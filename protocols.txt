@@ -1,0 +1,58 @@
+Client sends first message to indicate what it is doing
+    1 - "LOGIN"
+    2 - "LOGOUT"
+    3 - "USERNAME"
+    4 - "CREATE"
+    5 - "PASSWORD"
+
+LOGIN protocol
+
+client : LOGIN username password
+    server verifies username and password
+    case 1 - correct and existing username and password
+server : contents of note
+    case 2 - invalid
+server : INVALID
+    server closes connection
+
+LOGOUT protocol
+
+client : LOGOFF username password
+    server verifies username and password
+    case 1 - correct and existing username and password
+server : VERIFIED
+client : contents of note to be saved
+server : SAVED
+    case 2 - invalid
+server : INVALID
+    server closes connection
+
+USERNAME protocol
+
+client : USERNAME username password
+    server verifies username and password
+    case 1 - correct and existing username and password
+server : VERIFIED
+client : new username
+server : SAVED
+    case 2 - invalid
+server : INVALID
+    server closes connection
+
+PASSWORD protocol
+
+client : PASSWORD username password
+    server verifies username and password
+    case 1 - correct and existing username and password
+server : VERIFIED
+client : new password
+server : SAVED
+    case 2 - invalid
+server : INVALID
+    server closes connection
+
+CREATE protocol
+
+client : CREATE username password
+    server creates new profile
+server : CREATED
