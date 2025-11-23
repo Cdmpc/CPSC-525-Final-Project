@@ -8,30 +8,64 @@
 #include <vector>
 #include <string>
 #include <netdb.h>
-#include "user.hpp"
+#include <sstream>
+#include <iomanip>
+#include <stdio.h>
+#include <string.h>
+#include <fstream>
+#include <iostream>
+#include <filesystem>
+#include <cstring>
+#include <cerrno>
+#include "log.hpp"
 
 class Server
 {
-    private:
-        // member variables, m_ denotes them.
-        int m_serverSocket;
-        int m_numUsers;
-        uint16_t m_Port;
-        std::vector<User> m_Users; // because each will be pushed back as they are created this should stay sorted by userID
+    struct User{
+        char username[32] = {};
+        char handle[32] = {};
+        char password[32] = {};
+    };
 
-    public:
-        Server(uint16_t port); // ctor
-        ~Server();  // dtor
-        void run(); // call bind then listen
+    const size_t MAX_PAYLOAD = 4096 - (32 * 3);
+    const char* m_handlePre = "user";
+    const char* m_handlePost = ".txt";
+    std::string m_created = "CREATED";
+    std::string m_stored = "STORED";
+    std::string m_invalid = "INVALID";
+    std::filesystem::path m_secrets = "./Secrets";
+    std::string m_path = "./Secrets/";
+    int m_serverSocket;
+    int m_clientSocket;
+    int m_numUsers = 1;
+    uint16_t m_Port;
+    bool m_connection = false;
+    char m_recv[4096];
+    char m_send[4096];
+    char m_password[32];
+    char m_username[32];
+    char m_command[32];
+    char m_payload[4096];
+    ssize_t m_bytesRecv = 0;
+    ssize_t m_bytesSent = 0;
+    ssize_t m_payloadSize = 0;
+    std::vector<User> m_users; 
+    User m_user;
 
-    private:
-        // member functions
-        void bind_wrapper();                          // bind socket to supplied port
-        void listen_wrapper();                        // wait for connections, handle message in loop
-        void handle_message();                 // message payload based on defined payload protocol
-        bool verify_password();                // compare hashes
-        std::string & get_hash();                // hash passwords for storing and comparing
-        void store_note(std::string & contents); //  open file, store contents(will overwrite)
-        std::string & get_note();                // open file, read contents to string, return string (we could do encryption)
-        int get_id(std::string & username);      // return -1 if doesn't exist, enhached for loop through vector to find match
+public:
+    
+    Server(uint16_t port);
+    ~Server();  
+    void run(); 
+
+private:
+
+    void bind_wrapper();                          
+    void listen_wrapper();                        
+    int handle_message();                 
+    bool verify_password();
+    bool verify_user();                
+    void store_note();         
+    void get_note();                
+    std::string sha256(std::string& password);
 };

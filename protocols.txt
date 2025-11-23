@@ -7,7 +7,7 @@ Client sends first message to indicate what it is doing
 
 LOGIN protocol
 
-client : LOGIN username password
+client : LOGIN username password *
     server verifies username and password
     case 1 - correct and existing username and password
 server : contents of note
@@ -17,42 +17,39 @@ server : INVALID
 
 LOGOUT protocol
 
-client : LOGOFF username password
+client : LOGOFF username password *payload
     server verifies username and password
     case 1 - correct and existing username and password
 server : VERIFIED
-client : contents of note to be saved
-server : SAVED
     case 2 - invalid
 server : INVALID
     server closes connection
 
 USERNAME protocol
 
-client : USERNAME username password
+client : USERNAME username password *payload
     server verifies username and password
     case 1 - correct and existing username and password
-server : VERIFIED
-client : new username
-server : SAVED
+server : STORED
     case 2 - invalid
 server : INVALID
     server closes connection
 
 PASSWORD protocol
 
-client : PASSWORD username password
+client : PASSWORD username password *payload
     server verifies username and password
     case 1 - correct and existing username and password
-server : VERIFIED
-client : new password
-server : SAVED
+server : STORED
     case 2 - invalid
 server : INVALID
     server closes connection
 
 CREATE protocol
-
-client : CREATE username password
+client : CREATE username password *
+    case 1 - valid message
     server creates new profile
 server : CREATED
+    case 2 - invalid format
+server : INVALID
+    server closes connection

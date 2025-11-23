@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
     std::string port_str = "port";
     int port = atoi(argv[1]);
 
-    log_data(port_str, port);
+    log(port_str, port);
 
     // create server and run, run loops
     Server server(port);
