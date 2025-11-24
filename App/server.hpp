@@ -33,6 +33,7 @@ class Server
     std::string m_created = "CREATED";
     std::string m_stored = "STORED";
     std::string m_invalid = "INVALID";
+    std::string m_taken = "TAKEN";
     std::filesystem::path m_secrets = "./Secrets";
     std::string m_path = "./Secrets/";
     int m_serverSocket;
@@ -62,7 +63,8 @@ private:
 
     void bind_wrapper();                          
     void listen_wrapper();                        
-    int handle_message();                 
+    int handle_message(); 
+    bool user_exist();                
     bool verify_password();
     bool verify_user();                
     void store_note();         

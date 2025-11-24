@@ -117,6 +117,7 @@ void Server::listen_wrapper()
     memset(m_command, 0, sizeof(m_command));
     memset(m_username, 0, sizeof(m_username));
     memset(m_password, 0, sizeof(m_password));
+    memset(m_payload, 0, sizeof(m_payload));
    
     
     /* Wait for the message */
@@ -152,7 +153,7 @@ int Server::handle_message()
         }
         memcpy(m_payload, start + 1, MAX_PAYLOAD);
         // store payload size
-        m_payloadSize = m_bytesRecv - 12 - strlen(m_username) - strlen(m_password);
+        m_payloadSize = m_bytesRecv - 11 - strlen(m_username) - strlen(m_password);
     }
     catch(...){
         //message was invalid
@@ -167,6 +168,12 @@ int Server::handle_message()
     
     // create user
     if(!strcmp(m_command, "CREATE")){
+        if(user_exist()){
+            memcpy(m_send, m_taken.c_str(), m_taken.length());
+            m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
+            return 0;
+        }
+        // user doesn't exist safe to add
         User user;
         memcpy(user.username, m_username, sizeof(m_username));
         memcpy(user.password, m_password, sizeof(m_password));
@@ -232,10 +239,26 @@ int Server::handle_message()
     return 1;
 }
 
+bool Server::user_exist()
+{
+    for(User user : m_users){
+        if(!strcmp(user.username, m_username)){
+            return true;
+        }
+    }
+    return false;
+}
+
 // still need to be figured
 std::string Server::sha256(std::string& password)
 {
-    std::string hash = password;
+    // unsigned char hash[SHA256_DIGEST_LENGTH];
+    // SHA256_CTX sha256;
+    // SHA256_Init(&sha256);
+    // SHA256_Update(&sha256, data.c_str(), data.length());
+    // SHA256_Final(hash, &sha256);
+
+    std::string hash;
     return hash;
 }
 
