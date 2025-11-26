@@ -186,6 +186,7 @@ std::string Client::recieve_data()
         }
         log_data("bytes recieved from server", (int)bytes_recv);
         std::string recv_buff_string(this->recv_buff.begin(), this->recv_buff.begin() + bytes_recv);
+        recv_buff_string += "\n";
         std::cout << "\n[SERVER]: " << recv_buff_string << std::endl;
         return recv_buff_string;
     }
