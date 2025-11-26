@@ -30,10 +30,10 @@ class Server
     const size_t MAX_PAYLOAD = 4096 - (32 * 3);
     const char* m_handlePre = "user";
     const char* m_handlePost = ".txt";
-    std::string m_created = "CREATED";
-    std::string m_stored = "STORED";
-    std::string m_invalid = "INVALID";
-    std::string m_taken = "TAKEN";
+    std::string m_created = "CREATED\n";
+    std::string m_stored = "STORED\n";
+    std::string m_invalid = "INVALID\n";
+    std::string m_taken = "TAKEN\n";
     std::filesystem::path m_secrets = "./Secrets";
     std::string m_path = "./Secrets/";
     int m_serverSocket;
@@ -62,7 +62,7 @@ public:
 private:
 
     void bind_wrapper();                          
-    void listen_wrapper();                        
+    void communication_wrapper();                        
     int handle_message(); 
     bool user_exist();                
     bool verify_password();

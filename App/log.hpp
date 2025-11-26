@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 
-void log(std::string name, int value);
-void log(std::string name, std::string value);
-void log(std::string value);
-void log(std::string name, char* value);
+void log_data(std::string name, int value);
+void log_data(std::string name, std::string value);
+void log_data(std::string value);
+void log_data(std::string name, char* value);

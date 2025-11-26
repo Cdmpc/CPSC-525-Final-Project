@@ -1,5 +1,9 @@
 #include "server.hpp"
-
+#include "log.hpp"
+#include <cstddef>
+#include <cstring>
+#include <sys/socket.h>
+#include <unistd.h>
 
 // =============================================== [CONSTRUCTOR AND DESTRUCTOR] ===================================
 Server::Server(uint16_t port) : m_serverSocket(-1)
@@ -7,7 +11,7 @@ Server::Server(uint16_t port) : m_serverSocket(-1)
     /* Set the port NO */
     m_Port = port;
     if(std::filesystem::create_directories(m_secrets)){
-        log("file Secrets created");
+        log_data("file Secrets created");
     }
 }
 Server::~Server()
@@ -35,14 +39,20 @@ void Server::run()
     bind_wrapper();
     if(m_serverSocket == -1)
     {
-        log("bind error");
+        log_data("bind error");
         return;
     }
-    while(1){
-        listen_wrapper();
+    if(listen(m_serverSocket, 5) == -1)
+    {
+        log_data("listen error");
+        return;
+    }
+    while(1)
+    {
+        communication_wrapper();
         if(m_serverSocket == -1)
         { 
-            log("listen error");
+            log_data("listen error");
             return;
         }
     }
@@ -86,24 +96,21 @@ void Server::bind_wrapper()
 }
 
 
-/** Wrapper listen function to mark socket file descriptor as a passive socket to listen and comminucate with. */
-void Server::listen_wrapper()
+/** Wrapper to parse and handle messages from the client. */
+void Server::communication_wrapper()
 {
     int status;
-    status = listen(m_serverSocket,  5);
-    if(status == -1)
-    {
-        log("error calling listen");
-        return;
-    }
-
+    // Reset client socket before accept. 
+    m_clientSocket = -1;
     m_clientSocket = accept(m_serverSocket, nullptr, nullptr);
+    
     if(m_clientSocket == -1)
     {
-        log("error accepting connection");
+        log_data("error accepting connection");
         return;
     }
-    log("handleing client");
+    printf("\n");
+    log_data("handling client");
     
     // connection established
     m_connection = true;
@@ -112,29 +119,40 @@ void Server::listen_wrapper()
     m_bytesRecv = 0;
     m_bytesSent = 0;
 
-    memset(m_send, 0, sizeof(m_send));
-    memset(m_recv, 0, sizeof(m_recv));
-    memset(m_command, 0, sizeof(m_command));
-    memset(m_username, 0, sizeof(m_username));
-    memset(m_password, 0, sizeof(m_password));
-    memset(m_payload, 0, sizeof(m_payload));
-   
-    
-    /* Wait for the message */
-    m_bytesRecv = recv(m_clientSocket, m_recv, sizeof(m_recv), 0);
-    log("bytes recieved", m_bytesRecv);
-    log("message", m_recv);
-    
-    status = handle_message();
+    /* Connection loop so that the client can send multiple messages at once. */
+    while(true)
+    {
+        memset(m_send, 0, sizeof(m_send));
+        memset(m_recv, 0, sizeof(m_recv));
+        memset(m_command, 0, sizeof(m_command));
+        memset(m_username, 0, sizeof(m_username));
+        memset(m_password, 0, sizeof(m_password));
+        memset(m_payload, 0, sizeof(m_payload));
 
-    // 1 means message was invalid
-    if(status){
-        memcpy(m_send, m_invalid.c_str(), m_invalid.length());
-        m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("INVALID");
+        m_bytesRecv = recv(m_clientSocket, m_recv, sizeof(m_recv)-1, 0);
+        if(m_bytesRecv <= 0)
+        {
+            log_data("Client disconnected or recv error.");
+            break;
+        }
+
+        m_recv[m_bytesRecv] = '\0';  
+        printf("\n");
+        log_data("bytes recieved", m_bytesRecv);
+        log_data("message", m_recv);
+
+        status = handle_message();
+
+        if(status) {
+            memcpy(m_send, m_invalid.c_str(), m_invalid.length());
+            m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
+            log_data("INVALID");
+        }
     }
 
-    close(m_clientSocket);   
+    close(m_clientSocket);  // close when client disconnects
+    m_clientSocket = -1;
+    m_connection = false;
 }
 
 int Server::handle_message()
@@ -146,7 +164,7 @@ int Server::handle_message()
         ss >> m_username;
         ss >> m_password;
 
-        // get payload
+        // get payload after the * marker.
         char* start = strchr(m_recv, '*');
         if(start == NULL){
             return 1;
@@ -161,10 +179,10 @@ int Server::handle_message()
     }
 
     // parsed values
-    log("command", m_command);
-    log("username", m_username);
-    log("password", m_password);
-    log("payload", m_payload);
+    log_data("command", m_command);
+    log_data("username", m_username);
+    log_data("password", m_password);
+    log_data("payload", m_payload);
     
     // create user
     if(!strcmp(m_command, "CREATE")){
@@ -184,12 +202,11 @@ int Server::handle_message()
         memcpy(&user.handle[4 + id.length()], m_handlePost, 4);
 
         m_users.push_back(user);
-    
         memcpy(m_send, m_created.c_str(), m_created.length());
-        m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
+        m_bytesSent = send(m_clientSocket, m_send, (size_t)m_created.length(), 0);
         
-        log("CREATED");
-        log("handle", user.handle);
+        log_data("CREATED");
+        log_data("handle", user.handle);
         return 0;
     }
 
@@ -198,15 +215,15 @@ int Server::handle_message()
         //invalid username or password
         return 1;
     }
-    log("password valid");
+    log_data("password valid");
     
     // exploit - store new username
     if(!strcmp(m_command, "USERNAME")){
         memcpy(m_user.username, m_payload, m_payloadSize);   
         memcpy(m_send, m_stored.c_str(), m_stored.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("new username", m_user.username);
-        log("new handle", m_user.handle);
+        log_data("new username", m_user.username);
+        log_data("new handle", m_user.handle);
         return 0; 
     }
     
@@ -215,15 +232,15 @@ int Server::handle_message()
         memcpy(m_user.password, m_payload, m_payloadSize); 
         memcpy(m_send, m_stored.c_str(), m_stored.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("new password", m_user.password);
+        log_data("new password", m_user.password);
         return 0;
     }
 
     // send file contents back
     if(!strcmp(m_command, "LOGIN")){
         get_note();
-        m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("contents returned");
+        m_bytesSent = send(m_clientSocket, m_send, (size_t)m_bytesRecv, 0);
+        log_data("contents returned");
         return 0;
     }
 
@@ -231,17 +248,18 @@ int Server::handle_message()
     if(!strcmp(m_command, "LOGOFF")){
         store_note();
         memcpy(m_send, m_stored.c_str(), m_stored.length());
-        m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("contents stored");
+        m_bytesSent = send(m_clientSocket, m_send, (size_t)m_stored.length(), 0);
+        log_data("contents stored");
         return 0;
     }
+
     // invalid command    
     return 1;
 }
 
 bool Server::user_exist()
 {
-    for(User user : m_users){
+    for(const User & user : m_users){
         if(!strcmp(user.username, m_username)){
             return true;
         }
@@ -264,10 +282,10 @@ std::string Server::sha256(std::string& password)
 
 // check username and password
 bool Server::verify_user(){
-    for(User user : m_users){
+    for(const User & user : m_users){
         if(!strcmp(user.username, m_username)){
             m_user = user;
-            log("found", m_username);
+            log_data("found", m_username);
             if(verify_password()){
                 return true;
             }
@@ -285,13 +303,26 @@ bool Server::verify_password(){
 // store payload
 void Server::store_note(){
     std::ofstream fp(m_path + m_user.handle, std::ios::binary);
-    fp.write(m_payload, m_payloadSize);
+    if (fp.is_open()) {
+        fp.write(m_payload, m_payloadSize);
+    } else {
+        std::cerr << "Error opening file for write: " << m_path + m_user.handle << std::endl;
+    }
 }
 
 // prep send buffer with file contents 
 void Server::get_note(){
+    /* Clear buffer before reading */
+    memset(m_send, 0, sizeof(m_send));
     std::ifstream fp(m_path + m_user.handle, std::ios::binary);
-    fp.read(m_send, MAX_PAYLOAD);
+    if(fp.is_open()){
+        fp.read(m_send, MAX_PAYLOAD);
+        m_bytesRecv = (int)fp.gcount();
+    }
+    else{
+        std::cerr << "Server::get_note() failed!" << std::endl;
+        m_bytesRecv = 0;
+    }
 }
 
     
