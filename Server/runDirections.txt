@@ -1,0 +1,12 @@
+in folder Server
+
+COMPILE
+
+g++ -std=c++20 -Wall -o server server.cpp
+
+RUN
+
+./server port
+
+./server 5400
+

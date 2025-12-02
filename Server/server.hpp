@@ -17,7 +17,7 @@
 #include <filesystem>
 #include <cstring>
 #include <cerrno>
-#include "log.hpp"
+#include "log.cpp"
 
 class Server
 {
@@ -40,6 +40,7 @@ class Server
     int m_clientSocket;
     int m_numUsers = 1;
     uint16_t m_Port;
+    int m_user_index;
     bool m_connection = false;
     char m_recv[4096];
     char m_send[4096];

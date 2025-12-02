@@ -22,10 +22,11 @@
 class Client
 {
     std::string m_username;
+    std::string m_new_username;
     std::string m_password;
+    std::string m_new_password;
 
     const size_t MAX_PAYLOAD = 4096 - (32 * 3);
-    const char* m_handlePost = ".txt";
     std::string m_command = "";
     std::string m_response = "";
     std::string m_created = "CREATED";
@@ -39,9 +40,9 @@ class Client
     std::string m_hostname;
     char m_recv[4096];
     char m_send[4096];
+    char m_payload[4096];
     ssize_t m_bytesRecv = 0;
     ssize_t m_bytesSent = 0;
-    ssize_t m_payloadSize = 0;
     bool m_editing = true;
     bool m_connected = false;
 
@@ -53,8 +54,11 @@ public:
 
 private:
     
+    void returning_user();
     void get_username();
+    void get_new_username();
     void get_password();
+    void get_new_password();
     void connect_to_server();
     void create_user();
     void get_note();
@@ -64,5 +68,6 @@ private:
     void update_username();
     void update_password();
     void create_file_to_edit();
+    void file_to_payload();
 
 };

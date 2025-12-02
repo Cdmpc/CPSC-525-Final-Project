@@ -153,7 +153,7 @@ int Server::handle_message()
         }
         memcpy(m_payload, start + 1, MAX_PAYLOAD);
         // store payload size
-        m_payloadSize = m_bytesRecv - 11 - strlen(m_username) - strlen(m_password);
+        m_payloadSize = m_bytesRecv - 10 - strlen(m_username) - strlen(m_password);
     }
     catch(...){
         //message was invalid
@@ -202,20 +202,21 @@ int Server::handle_message()
     
     // exploit - store new username
     if(!strcmp(m_command, "USERNAME")){
-        memcpy(m_user.username, m_payload, m_payloadSize);   
+        log("index", m_user_index);
+        memcpy(m_users[m_user_index].username, m_payload, m_payloadSize);   
         memcpy(m_send, m_stored.c_str(), m_stored.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("new username", m_user.username);
-        log("new handle", m_user.handle);
+        log("new username", m_users[m_user_index].username);
+        log("new handle", m_users[m_user_index].handle);
         return 0; 
     }
     
     // store new password
     if(!strcmp(m_command, "PASSWORD")){
-        memcpy(m_user.password, m_payload, m_payloadSize); 
+        memcpy(m_users[m_user_index].password, m_payload, m_payloadSize); 
         memcpy(m_send, m_stored.c_str(), m_stored.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("new password", m_user.password);
+        log("new password", m_users[m_user_index].password);
         return 0;
     }
 
@@ -242,8 +243,6 @@ int Server::handle_message()
 bool Server::user_exist()
 {
     for(User user : m_users){
-        log(user.username);
-        log(m_username);
         if(!strcmp(user.username, m_username)){
             return true;
         }
@@ -254,27 +253,24 @@ bool Server::user_exist()
 // still need to be figured
 std::string Server::sha256(std::string& password)
 {
-    // unsigned char hash[SHA256_DIGEST_LENGTH];
-    // SHA256_CTX sha256;
-    // SHA256_Init(&sha256);
-    // SHA256_Update(&sha256, data.c_str(), data.length());
-    // SHA256_Final(hash, &sha256);
-
     std::string hash;
     return hash;
 }
 
 // check username and password
 bool Server::verify_user(){
+    int index = 0;
     for(User user : m_users){
         if(!strcmp(user.username, m_username)){
             m_user = user;
+            m_user_index = index;
             log("found", m_username);
             if(verify_password()){
                 return true;
             }
             return false;
         }
+        index++;
     }
     return false;
 } 
@@ -296,6 +292,27 @@ void Server::get_note(){
     fp.read(m_send, MAX_PAYLOAD);
 }
 
-    
+
+int main(int argc, char* argv[]){
+
+    if(argc < 2){
+        std::cout << "please define port number" << std::endl;
+        return -1;
+    }
+    if(strlen(argv[1]) != 4){
+        std::cout << "port number must be 4 digits" << std::endl;
+        return -1;
+    }
+    std::string port_str = "port";
+    int port = atoi(argv[1]);
+
+    log(port_str, port);
+
+    // create server and run, run loops
+    Server server(port);
+    server.run();
+
+    return 0;
+}
 
 

@@ -5,6 +5,8 @@ Client sends first message to indicate what it is doing
     4 - "CREATE"
     5 - "PASSWORD"
 
+*** SOME MAYBE SLIGHTLY ALTERED AND NEED UPDATING
+
 LOGIN protocol
 
 client : LOGIN username password *
@@ -53,7 +55,6 @@ server : CREATED
     case 2 - already exisits
 server : TAKEN
     server closes connection
-
 
 
 Exploit
