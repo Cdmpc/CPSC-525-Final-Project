@@ -50,8 +50,8 @@ client : CREATE username password *
     case 1 - valid message
     server creates new profile
 server : CREATED
-    case 2 - invalid format
-server : INVALID
+    case 2 - already exisits
+server : TAKEN
     server closes connection
 
 

@@ -242,6 +242,8 @@ int Server::handle_message()
 bool Server::user_exist()
 {
     for(User user : m_users){
+        log(user.username);
+        log(m_username);
         if(!strcmp(user.username, m_username)){
             return true;
         }

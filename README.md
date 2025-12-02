@@ -4,7 +4,7 @@ CPSC 525 Fall 2025 - Final Project Repository
 ## Compile program (Will change):
 
 ```bash
- g++ -std+C++20 -Wall -o ./Execs/app ./App/log.cpp ./App/main.cpp ./App/server.cpp
+ g++ -std=C++20 -Wall -o ./Execs/app ./App/log.cpp ./App/main.cpp ./App/server.cpp
  ```
  
 ## Run program on example port 5400 (Passed as argv[1] to main()):
@@ -37,3 +37,7 @@ LOGOFF bob secret1 *I LIKE PEANUTS
 LOGIN bob secret1 *
 PASSWORD bob secret1 *newpass123
 LOGIN bob newpass123 *
+
+To do:
+
+add resolving of hostname
