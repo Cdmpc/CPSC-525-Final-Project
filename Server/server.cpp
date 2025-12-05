@@ -1,4 +1,19 @@
 #include "server.hpp"
+#include <filesystem>
+
+void remove_all_contents(const std::filesystem::path & p)
+{
+    if(!std::filesystem::is_directory(p))
+    {
+        std::cerr << "Server --> remove_all_contents() --> not a directory!" << std::endl;
+        return;
+    }
+
+    for (const std::filesystem::directory_entry & entry : std::filesystem::directory_iterator(p))
+    {
+        std::filesystem::remove_all(entry.path());
+    }
+}
 
 
 // =============================================== [CONSTRUCTOR AND DESTRUCTOR] ===================================
@@ -23,7 +38,7 @@ Server::~Server()
     }
     close(m_serverSocket);
     if(std::filesystem::exists(m_secrets)){
-        std::filesystem::remove_all(m_secrets);
+        remove_all_contents(m_secrets);
     }
 
 }
