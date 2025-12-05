@@ -248,3 +248,6 @@ __marimo__/
 
 # debug information files
 *.dwo
+
+# Text files from Secrets
+Secrets/user*.txt

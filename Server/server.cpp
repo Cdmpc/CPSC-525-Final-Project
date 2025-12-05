@@ -7,7 +7,7 @@ Server::Server(uint16_t port) : m_serverSocket(-1)
     /* Set the port NO */
     m_Port = port;
     if(std::filesystem::create_directories(m_secrets)){
-        log("file Secrets created");
+        srv_log("file Secrets created");
     }
 }
 Server::~Server()
@@ -35,14 +35,14 @@ void Server::run()
     bind_wrapper();
     if(m_serverSocket == -1)
     {
-        log("bind error");
+        srv_log("bind error");
         return;
     }
     while(1){
         listen_wrapper();
         if(m_serverSocket == -1)
         { 
-            log("listen error");
+            srv_log("listen error");
             return;
         }
     }
@@ -93,17 +93,17 @@ void Server::listen_wrapper()
     status = listen(m_serverSocket,  5);
     if(status == -1)
     {
-        log("error calling listen");
+        srv_log("error calling listen");
         return;
     }
 
     m_clientSocket = accept(m_serverSocket, nullptr, nullptr);
     if(m_clientSocket == -1)
     {
-        log("error accepting connection");
+        srv_log("error accepting connection");
         return;
     }
-    log("handleing client");
+    srv_log("handleing client");
     
     // connection established
     m_connection = true;
@@ -122,8 +122,8 @@ void Server::listen_wrapper()
     
     /* Wait for the message */
     m_bytesRecv = recv(m_clientSocket, m_recv, sizeof(m_recv), 0);
-    log("bytes recieved", m_bytesRecv);
-    log("message", m_recv);
+    srv_log("bytes recieved", m_bytesRecv);
+    srv_log("message", m_recv);
     
     status = handle_message();
 
@@ -131,7 +131,7 @@ void Server::listen_wrapper()
     if(status){
         memcpy(m_send, m_invalid.c_str(), m_invalid.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("INVALID");
+        srv_log("INVALID");
     }
 
     close(m_clientSocket);   
@@ -161,10 +161,10 @@ int Server::handle_message()
     }
 
     // parsed values
-    log("command", m_command);
-    log("username", m_username);
-    log("password", m_password);
-    log("payload", m_payload);
+    srv_log("command", m_command);
+    srv_log("username", m_username);
+    srv_log("password", m_password);
+    srv_log("payload", m_payload);
     
     // create user
     if(!strcmp(m_command, "CREATE")){
@@ -188,8 +188,8 @@ int Server::handle_message()
         memcpy(m_send, m_created.c_str(), m_created.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
         
-        log("CREATED");
-        log("handle", user.handle);
+        srv_log("CREATED");
+        srv_log("handle", user.handle);
         return 0;
     }
 
@@ -198,16 +198,16 @@ int Server::handle_message()
         //invalid username or password
         return 1;
     }
-    log("password valid");
+    srv_log("password valid");
     
     // exploit - store new username
     if(!strcmp(m_command, "USERNAME")){
-        log("index", m_user_index);
+        srv_log("index", m_user_index);
         memcpy(m_users[m_user_index].username, m_payload, m_payloadSize);   
         memcpy(m_send, m_stored.c_str(), m_stored.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("new username", m_users[m_user_index].username);
-        log("new handle", m_users[m_user_index].handle);
+        srv_log("new username", m_users[m_user_index].username);
+        srv_log("new handle", m_users[m_user_index].handle);
         return 0; 
     }
     
@@ -216,7 +216,7 @@ int Server::handle_message()
         memcpy(m_users[m_user_index].password, m_payload, m_payloadSize); 
         memcpy(m_send, m_stored.c_str(), m_stored.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("new password", m_users[m_user_index].password);
+        srv_log("new password", m_users[m_user_index].password);
         return 0;
     }
 
@@ -224,7 +224,7 @@ int Server::handle_message()
     if(!strcmp(m_command, "LOGIN")){
         get_note();
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("contents returned");
+        srv_log("contents returned");
         return 0;
     }
 
@@ -233,7 +233,7 @@ int Server::handle_message()
         store_note();
         memcpy(m_send, m_stored.c_str(), m_stored.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        log("contents stored");
+        srv_log("contents stored");
         return 0;
     }
     // invalid command    
@@ -264,7 +264,7 @@ bool Server::verify_user(){
         if(!strcmp(user.username, m_username)){
             m_user = user;
             m_user_index = index;
-            log("found", m_username);
+            srv_log("found", m_username);
             if(verify_password()){
                 return true;
             }
@@ -306,7 +306,7 @@ int main(int argc, char* argv[]){
     std::string port_str = "port";
     int port = atoi(argv[1]);
 
-    log(port_str, port);
+    srv_log(port_str, port);
 
     // create server and run, run loops
     Server server(port);

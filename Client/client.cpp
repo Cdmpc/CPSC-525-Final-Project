@@ -1,11 +1,13 @@
 # include "client.hpp"
+#include <cstddef>
+#include <string>
 
 Client::Client(std::string hostname, uint16_t port)
 {
     // hostname must be ip till updated to resolve host 
     m_hostname = hostname;
     m_port = port;
-    log("object created");
+    cli_log("object created");
 }
 
 Client::~Client(){
@@ -27,8 +29,9 @@ void Client::returning_user()
     std::cout << "Do you already have and account (Y/N) ? : ";
     while (invalid){
         std::getline(std::cin, temp);
-        log(temp);
-        if(temp.find('Y') == -1  && temp.find('y') == -1 && temp.find('N') == -1 && temp.find('n') == -1){
+        cli_log(temp);
+        if(temp.find('Y') == std::string::npos  && temp.find('y') == std::string::npos 
+        && temp.find('N') == std::string::npos && temp.find('n') == std::string::npos){
             temp.clear();
             std::cout << "(Y/N) ? : ";
             continue;
@@ -58,13 +61,12 @@ void Client::get_username()
     bool invalid = true;
     std::string temp;
     while (invalid){
-        std::cout << "Please enter your username: ";
+        std::cout << "\nPlease enter your username: ";
         std::getline(std::cin, temp);
-        log(temp);
+        cli_log(temp);
         if(temp.length() < 1 || temp.length() > 31){
             temp.clear();
             std::cout << "username length must be in range [1,31]" << std::endl;
-            std::cout << "Please enter your username: ";
             continue;
         }
         else{
@@ -80,13 +82,12 @@ void Client::get_new_username()
     bool invalid = true;
     std::string temp;
     while (invalid){
-        std::cout << "Please enter your username: ";
+        std::cout << "\nPlease enter your username: ";
         std::getline(std::cin, temp);
-        log(temp);
+        cli_log(temp);
         if(temp.length() < 1 || temp.length() > 31){
             temp.clear();
             std::cout << "username length must be in range [1,31]" << std::endl;
-            std::cout << "Please enter your username: ";
             continue;
         }
         else{
@@ -102,13 +103,12 @@ void Client::get_password()
     bool invalid = true;
     std::string temp;
     while (invalid){
-        std::cout << "Please enter your password: ";
+        std::cout << "\nPlease enter your password: ";
         std::getline(std::cin, temp);
-        log(temp);
+        cli_log(temp);
         if(temp.length() < 8 || temp.length() > 31){
             temp.clear();
             std::cout << "password length must be in range [8,31]" << std::endl;
-            std::cout << "Please enter your password: ";
             continue;
         }
         else{
@@ -124,13 +124,12 @@ void Client::get_new_password()
     bool invalid = true;
     std::string temp;
     while (invalid){
-        std::cout << "Please enter your password: ";
+        std::cout << "\nPlease enter your password: ";
         std::getline(std::cin, temp);
-        log(temp);
+        cli_log(temp);
         if(temp.length() < 8 || temp.length() > 31){
             temp.clear();
             std::cout << "password length must be in range [8,31]" << std::endl;
-            std::cout << "Please enter your password: ";
             continue;
         }
         else{
@@ -203,7 +202,7 @@ void Client::create_user()
 
 void Client::handle_commands()
 {
-    log("handling commands");
+    cli_log("handling commands");
     std::cout << "Your secret can be writen in your temp.txt file, remember to save when done" << std::endl;
     std::cout << std::endl;
 
@@ -217,14 +216,15 @@ void Client::handle_commands()
         char command;
         while (invalid){
             std::getline(std::cin, temp);
-            log(temp);
-            if(temp.find('1') == -1  && temp.find('2') == -1 && temp.find('3') == -1){
+            cli_log(temp);
+            if(temp.find('1') == std::string::npos && temp.find('2') == std::string::npos
+            && temp.find('3') == std::string::npos){
                 temp.clear();
                 std::cout << "(1, 2, 3) ? : ";
                 continue;
             }
             else{
-                int lowest;
+                size_t lowest;
                 
                 temp.find('1') < temp.find('2') ? (lowest = temp.find('1')) : (lowest = temp.find('2'));
                 if(temp.find('3') < lowest){
@@ -248,7 +248,7 @@ void Client::handle_commands()
                 update_password();
                 break;
             default :
-                log("How did that happen? Unexpected input in handle_commands switch");
+                cli_log("How did that happen? Unexpected input in handle_commands switch");
                 break;
         }
     }
@@ -262,9 +262,9 @@ void Client::connect_to_server()
         m_clientSocket = socket(AF_INET, SOCK_STREAM, 0);
         if(m_clientSocket == -1)
         {
-            log("falied to create socket");
+            cli_log("falied to create socket");
             sleep(1);
-            log("reattemptng...");
+            cli_log("reattemptng...");
             m_connected = false;
             continue;
         }
@@ -279,9 +279,9 @@ void Client::connect_to_server()
         int conn_res = connect(m_clientSocket, (const struct sockaddr*)&server_address, (socklen_t)sizeof(sockaddr_in));
         if(conn_res == -1)
         {
-            log("failed to connect to server");
+            cli_log("failed to connect to server");
             sleep(1);
-            log("reattemptng...");
+            cli_log("reattemptng...");
             m_connected = false;
             continue;
         }
@@ -296,14 +296,14 @@ void Client::execute_command()
     // if ececuting command, last command handled
     m_response.clear();
     // connect and execute
-    log(m_command);
+    cli_log(m_command);
     memcpy(m_send, m_command.c_str(), m_command.length());
     connect_to_server();
     m_bytesSent = send(m_clientSocket, m_send, m_command.length(), 0);
-    log("bytes sent", m_bytesSent);
+    cli_log("bytes sent", m_bytesSent);
     m_bytesRecv = recv(m_clientSocket, m_recv, sizeof(m_recv), 0);
     m_response = m_recv;
-    log("response", m_response);
+    cli_log("response", m_response);
 
     //cleanup
     memset(m_send, 0, sizeof(m_send));
@@ -321,11 +321,11 @@ void Client::store_note()
     m_command.append(" *");
     file_to_payload();
     m_command.append(m_payload);
-    log("command in store note", m_command);
+    cli_log("command in store note", m_command);
     execute_command();
 
     // to do handle response
-    log("STORING NOTE...now exiting");
+    cli_log("STORING NOTE...now exiting");
 }
 
 void Client::update_username()
@@ -342,7 +342,7 @@ void Client::update_username()
     execute_command();
 
     // to do handle response
-    log("UPDATE USERNAME...now returning");
+    cli_log("UPDATE USERNAME...now returning");
 }
 
 void Client::update_password()
@@ -359,7 +359,7 @@ void Client::update_password()
     execute_command();
 
     // to do handle response
-    log("UPDATE password...now returning");
+    cli_log("UPDATE password...now returning");
 }
 
 void Client::create_file_to_edit()
@@ -378,14 +378,14 @@ void Client::file_to_payload(){
 int main(int argc, char* argv[]){
 
     if(argc < 3){
-        std::cout << "useage : port hostname" << std::endl;
+        std::cout << "useage : hostname port" << std::endl;
         return -1;
     }
     if(strlen(argv[2]) != 4){
         std::cout << "port number must be 4 digits" << std::endl;
         return -1;
     }
-    std::string port_str = "port";
+    std::string port_str = "PORT";
     int port = atoi(argv[2]);
     std::string hostname = argv[1];
 

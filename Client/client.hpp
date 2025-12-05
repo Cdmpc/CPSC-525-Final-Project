@@ -18,6 +18,7 @@
 #include <cstring>
 #include <cerrno>
 #include "log.cpp"
+#include <algorithm>
 
 class Client
 {
