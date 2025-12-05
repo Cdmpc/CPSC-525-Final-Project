@@ -50,3 +50,8 @@ create_N_notes() succeeded, please check ./Secrets directory.
 ```
 
 ### 5. The secret files will be located in a created directory called ./Secrets, where your current working directory is the repository's directory.
+
+The secret files will have the name format "userN.txt" and contain the following format:
+```
+Hi, this is USER_N, and this file is my secret!
+```
