@@ -48,5 +48,6 @@ create_N_notes() succeeded, please check ./Secrets directory.
 
 ============================== [EXPLOIT TERMINATED] ==============================
 ```
+NOTE: DO NOT leave the "users to create" prompt empty, as this will cause the prgoram to fail on it's next run.
 
 ### 5. The secret files will be located in a created directory called ./Secrets, where your current working directory is the repository's directory.
