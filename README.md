@@ -1,4 +1,4 @@
-# CURRENT STAGE OF EXPLOIT (INCOMPLETE)
+# CURRENT STAGE OF EXPLOIT (INCOMPLETE - USER CREATION COMPLETE, NO EXPLOIT YET)
 
 Authored by: Shawn Hanlon & Carlos Morera Pinilla
 
@@ -26,17 +26,29 @@ g++ -std=c++20 -Wall -o ./Server/server ./Server/server.cpp
 g++ -std=c++20 -Wall -o ./Client/client ./Client/client.cpp
 ```
 
-### 3. Run the Python Exploit Script
+### 2.5: Start the SERVER PROGRAM FIRST (Example PORT 7000)
+```
+./Server/server 7000
+```
+
+If you see this: 
+```
+LOG::port : 7000
+```
+The server is connected and ready to go.
+
+### 3. Run the Python Exploit Script, using example 127.0.0.1 and port 7000
+#### NOTE: Use the SAME port number for the Client that you started the Server with.
 ```bash
-python3 ./Exploit/heap-exploit.py ./Server/server ./Client/client
+python3 ./Client/user-gen.py 127.0.0.1 7000
 ```
 
 If you do not provide command-line arguements to the Python script, this prompt will appear.
 ```bash
-argv[1] == <path_to_server_executable>
-argv[2] == <path_to_client_executable>
-Usage: python3 ./Exploit/heap-exploit.py argv[1] argv[2]
-Example: python3 ./Exploit/heap-exploit.py ./Server/server ./Client/client
+CAUGHT ERROR: main() function failed, did you try:
+"argv[1] == IP ADDRESS (127.0.0.1 for example)"
+"argv[2] == PORT NUMBER (Ex: 5400)"
+"Usage: python3 ./Exploit/heap-exploit.py argv[1] argv[2]"
 ```
 ### 4. Follow the prompt:
 ```
@@ -53,5 +65,7 @@ create_N_notes() succeeded, please check ./Secrets directory.
 
 The secret files will have the name format "userN.txt" and contain the following format:
 ```
-Hi, this is USER_N, and this file is my secret!
+[N] ==> USER_N SECRET
 ```
+
+### NOTE: Limitation, the Client can only run once, subsequent runs of the Client/automation script will cause it to fail. To run it successfuly again, you must manually close and restart the Server, then run the Client again once the Server restarts.

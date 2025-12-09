@@ -25,11 +25,11 @@ def rm_all_files(dir_path):
     else:
         print("Directory is already empty, no files to remove...");
 
-def create_N_notes(N, cli_exepath):
+def create_N_notes(N, IP_ADDR, PORT):
     # Create the N users
     for i in range(1, N + 1):
         # Open up the client as well, on the same port.
-        cli_process = pop.PopenSpawn(f"stdbuf -o0 {cli_exepath} 127.0.0.1 5400", timeout=5);
+        cli_process = pop.PopenSpawn(f"stdbuf -o0 ./Client/client {IP_ADDR} {PORT}", timeout=5);
         cli_process.delaybeforesend = None;
 
         if DEBUG:
@@ -65,7 +65,7 @@ def create_N_notes(N, cli_exepath):
     print(f"{N} users created, returning from function...");
 
 # ============================================= [MAIN DEFINITION] ============================================== #
-def main(srv_exepath, cli_exepath):
+def main(IP_ADDRESS, PORT_NO):
     try:
         # Delete the temp file if it exists before running the exploit script.
         # Also delete the secret text files in the Secrets directory.
@@ -74,15 +74,15 @@ def main(srv_exepath, cli_exepath):
         # Create the "Secrets" directory, if it does not exist.
         plib.Path("./Secrets").mkdir(exist_ok=True);
 
-        secret_dir = "./Secrets/";
-        rm_all_files(dir_path=secret_dir);
+        # secret_dir = "./Secrets/";
+        # rm_all_files(dir_path=secret_dir);
 
         # Open the server executable, on port 5400
-        srv_process = pop.PopenSpawn(f"stdbuf -o0 {srv_exepath} 5400", timeout=5);
-        srv_process.delaybeforesend = None;
+        # srv_process = pop.PopenSpawn(f"stdbuf -o0 {srv_exepath} 5400", timeout=5);
+        # srv_process.delaybeforesend = None;
 
-        if DEBUG:
-            srv_process.logfile = sys.stdout.buffer;
+        # if DEBUG:
+        #     srv_process.logfile = sys.stdout.buffer;
         
         valid_input = False;
 
@@ -92,21 +92,21 @@ def main(srv_exepath, cli_exepath):
                 N_users = int(N_users);
                 valid_input = True;
                 # Let's create N users
-                create_N_notes(N=N_users, cli_exepath=cli_exepath);
+                create_N_notes(N=N_users, IP_ADDR=IP_ADDRESS, PORT=PORT_NO);
                 print("create_N_notes() succeeded, please check ./Secrets directory.");
             
             # If the user did not put in anything for created users, just use the default of 50.
             elif (N_users == ""):
                 print("No input detected, using default value of 50 users...");
                 valid_input = True;
-                create_N_notes(N=50, cli_exepath=cli_exepath);
+                create_N_notes(N=50, IP_ADDR=IP_ADDRESS, PORT=PORT_NO);
                 print("create_N_notes() succeeded, please check ./Secrets directory.");
             
             else:
                 print("INVALID INPUT, PLEASE ENTER A NUMBER <= 100\n");
     
-        #TODO: Close the server process (might have to move this around.)
-        srv_process.kill(signal.SIGTERM);
+        # #TODO: Close the server process (might have to move this around.)
+        # srv_process.kill(signal.SIGTERM);
 
         # Clear the temp file once it's done.
         plib.Path("./temp.txt").unlink(missing_ok=True);
@@ -122,6 +122,6 @@ if __name__ == "__main__":
         print("\n============================== [EXPLOIT TERMINATED] ==============================");
     except Exception:
         print("\nCAUGHT ERROR: main() function failed, did you try: ");
-        print("argv[1] == <path_to_server_executable>");
-        print("argv[2] == <path_to_client_executable>");
-        print("Usage: python3 ./Exploit/heap-exploit.py argv[1] argv[2]");
+        print("argv[1] == IP ADDRESS (127.0.0.1 for example)");
+        print("argv[2] == PORT NUMBER (Ex: 5400)");
+        print("Usage: python3 ./Client/user-gen.py argv[1] argv[2]");
