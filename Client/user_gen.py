@@ -5,6 +5,9 @@ import pexpect as pex;
 import pexpect.popen_spawn as pop;
 import signal;
 import pathlib as plib;
+import hashlib;
+import random;
+import string;
 
 DEBUG = os.environ.get("DEBUG", "0").lower() in ["1", "y", "yes", "true", "on", "color"];
 
@@ -25,16 +28,30 @@ def rm_all_files(dir_path):
     else:
         print("Directory is already empty, no files to remove...");
 
-def create_N_notes(N, cli_exepath):
+def sha_256_hash_str(string):
+    # Convert the string to UTF-8 bytes
+    encoded_string = string.encode("utf-8");
+
+    # Create a new SHA256 hash object
+    sha256 = hashlib.sha256();
+
+    # Convert the bytes into the hash.
+    sha256.update(encoded_string);
+
+    # Return the hexadecmial representation of the hash.
+    return sha256.hexdigest();
+
+
+def create_N_notes(N, IP_ADDR, PORT):
     # Create the N users
     for i in range(1, N + 1):
         # Open up the client as well, on the same port.
-        cli_process = pop.PopenSpawn(f"stdbuf -o0 {cli_exepath} 127.0.0.1 5400", timeout=5);
+        cli_process = pop.PopenSpawn(f"stdbuf -o0 ./Client/client {IP_ADDR} {PORT}", timeout=5);
         cli_process.delaybeforesend = None;
 
         if DEBUG:
             cli_process.logfile = sys.stdout.buffer;
-
+        # Create the user metadata.
         cli_process.expect_exact("Do you already have and account (Y/N) ? : ");
         cli_process.sendline("N");
 
@@ -42,9 +59,9 @@ def create_N_notes(N, cli_exepath):
         cli_process.expect_exact("Please enter your username: ");
         cli_process.sendline(f"user_{i}");
 
-        # Send in sample passwords with the same format : password_i
+        # Send length-20 passwords of psuedorandom alphanum passwords: [a-zA-Z0-9]
         cli_process.expect_exact("Please enter your password: ");
-        cli_process.sendline(f"password_{i}");
+        cli_process.sendline("".join(random.choices(string.ascii_letters + string.digits, k=20)));
 
         # NOTE: The temp.txt file is created automatically from the C++ program, 
         # once you enter a username and password.
@@ -52,7 +69,8 @@ def create_N_notes(N, cli_exepath):
 
         # NOTE: Make sure to write to the created temp.txt file BEFORE entering "1" input.
         with open("./temp.txt", "w") as fp:
-            fp.write(f"Hi, this is USER_{i}, and this file is my secret!");
+            secret_message = f"[{i}] ==> USER_{i} SECRET";
+            fp.write(sha_256_hash_str(secret_message));
 
         # Upload the file, which can be found at Secrets directory.
         cli_process.sendline("1");
@@ -65,21 +83,24 @@ def create_N_notes(N, cli_exepath):
     print(f"{N} users created, returning from function...");
 
 # ============================================= [MAIN DEFINITION] ============================================== #
-def main(srv_exepath, cli_exepath):
+def main(IP_ADDRESS, PORT_NO):
     try:
         # Delete the temp file if it exists before running the exploit script.
         # Also delete the secret text files in the Secrets directory.
         plib.Path("./temp.txt").unlink(missing_ok=True);
 
-        secret_dir = "./Secrets/";
-        rm_all_files(dir_path=secret_dir);
+        # Create the "Secrets" directory, if it does not exist.
+        plib.Path("./Secrets").mkdir(exist_ok=True);
+
+        # secret_dir = "./Secrets/";
+        # rm_all_files(dir_path=secret_dir);
 
         # Open the server executable, on port 5400
-        srv_process = pop.PopenSpawn(f"stdbuf -o0 {srv_exepath} 5400", timeout=5);
-        srv_process.delaybeforesend = None;
+        # srv_process = pop.PopenSpawn(f"stdbuf -o0 {srv_exepath} 5400", timeout=5);
+        # srv_process.delaybeforesend = None;
 
-        if DEBUG:
-            srv_process.logfile = sys.stdout.buffer;
+        # if DEBUG:
+        #     srv_process.logfile = sys.stdout.buffer;
         
         valid_input = False;
 
@@ -89,21 +110,21 @@ def main(srv_exepath, cli_exepath):
                 N_users = int(N_users);
                 valid_input = True;
                 # Let's create N users
-                create_N_notes(N=N_users, cli_exepath=cli_exepath);
+                create_N_notes(N=N_users, IP_ADDR=IP_ADDRESS, PORT=PORT_NO);
                 print("create_N_notes() succeeded, please check ./Secrets directory.");
             
             # If the user did not put in anything for created users, just use the default of 50.
             elif (N_users == ""):
                 print("No input detected, using default value of 50 users...");
                 valid_input = True;
-                create_N_notes(N=50, cli_exepath=cli_exepath);
+                create_N_notes(N=50, IP_ADDR=IP_ADDRESS, PORT=PORT_NO);
                 print("create_N_notes() succeeded, please check ./Secrets directory.");
             
             else:
                 print("INVALID INPUT, PLEASE ENTER A NUMBER <= 100\n");
     
-        #TODO: Close the server process (might have to move this around.)
-        srv_process.kill(signal.SIGTERM);
+        # #TODO: Close the server process (might have to move this around.)
+        # srv_process.kill(signal.SIGTERM);
 
         # Clear the temp file once it's done.
         plib.Path("./temp.txt").unlink(missing_ok=True);
@@ -119,6 +140,6 @@ if __name__ == "__main__":
         print("\n============================== [EXPLOIT TERMINATED] ==============================");
     except Exception:
         print("\nCAUGHT ERROR: main() function failed, did you try: ");
-        print("argv[1] == <path_to_server_executable>");
-        print("argv[2] == <path_to_client_executable>");
-        print("Usage: python3 ./Exploit/heap-exploit.py argv[1] argv[2]");
+        print("argv[1] == IP ADDRESS (127.0.0.1 for example)");
+        print("argv[2] == PORT NUMBER (Ex: 5400)");
+        print("Usage: python3 ./Client/user-gen.py argv[1] argv[2]");

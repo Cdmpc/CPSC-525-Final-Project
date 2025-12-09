@@ -1,11 +1,7 @@
-Client sends first message to indicate what it is doing
-    1 - "LOGIN"
-    2 - "LOGOUT"
-    3 - "USERNAME"
-    4 - "CREATE"
-    5 - "PASSWORD"
 
-*** SOME MAYBE SLIGHTLY ALTERED AND NEED UPDATING
+ALL PROTOCOLS are of the form client sends command responses and closes connection.
+1 command, 1 response, connection closed.
+* indicates to server where payload starts.
 
 LOGIN protocol
 
@@ -22,7 +18,8 @@ LOGOUT protocol
 client : LOGOFF username password *payload
     server verifies username and password
     case 1 - correct and existing username and password
-server : VERIFIED
+    server stores password to file.
+server : STORED
     case 2 - invalid
 server : INVALID
     server closes connection
@@ -32,6 +29,7 @@ USERNAME protocol
 client : USERNAME username password *payload
     server verifies username and password
     case 1 - correct and existing username and password
+    updates username
 server : STORED
     case 2 - invalid
 server : INVALID
@@ -42,6 +40,7 @@ PASSWORD protocol
 client : PASSWORD username password *payload
     server verifies username and password
     case 1 - correct and existing username and password
+    updates password
 server : STORED
     case 2 - invalid
 server : INVALID
@@ -55,14 +54,3 @@ server : CREATED
     case 2 - already exisits
 server : TAKEN
     server closes connection
-
-
-Exploit
-
-1 - connect
-2 - send - "CREATE bob secret1 *"
-3 - send - "USERNAME bob secret1 *bob\x001234567890123456789012345678user1.txt
-4 - send - "LOGIN bob secret1 *"
-5 - recv - user1 note
-
-repeat user2 upto INVALID

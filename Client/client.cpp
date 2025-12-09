@@ -11,7 +11,7 @@ Client::Client(std::string hostname, uint16_t port)
 }
 
 Client::~Client(){
-
+    std::remove("temp.txt");
 }
 
 void Client::run(){
@@ -82,7 +82,7 @@ void Client::get_new_username()
     bool invalid = true;
     std::string temp;
     while (invalid){
-        std::cout << "\nPlease enter your username: ";
+        std::cout << "\nPlease enter your new username: ";
         std::getline(std::cin, temp);
         cli_log(temp);
         if(temp.length() < 1 || temp.length() > 31){
@@ -340,6 +340,7 @@ void Client::update_username()
     get_new_username();
     m_command.append(m_new_username);
     execute_command();
+    m_username = m_new_username;
 
     // to do handle response
     cli_log("UPDATE USERNAME...now returning");
@@ -357,6 +358,7 @@ void Client::update_password()
     get_new_password();
     m_command.append(m_new_password);
     execute_command();
+    m_password = m_new_password;
 
     // to do handle response
     cli_log("UPDATE password...now returning");

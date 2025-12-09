@@ -21,6 +21,9 @@ Server::Server(uint16_t port) : m_serverSocket(-1)
 {
     /* Set the port NO */
     m_Port = port;
+    if(std::filesystem::exists(m_secrets)){
+        std::filesystem::remove_all(m_secrets);
+    }
     if(std::filesystem::create_directories(m_secrets)){
         srv_log("file Secrets created");
     }
@@ -258,7 +261,10 @@ int Server::handle_message()
 bool Server::user_exist()
 {
     for(User user : m_users){
+        srv_log("user**", user.username);
+        srv_log("password** ", user.password);
         if(!strcmp(user.username, m_username)){
+            srv_log("user already exists");
             return true;
         }
     }

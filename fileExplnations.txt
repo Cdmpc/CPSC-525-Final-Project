@@ -20,15 +20,18 @@ Folder Client
     -log.cpp
     -client.hpp
     -client.cpp
+    -user_gen.py (creates random users)
 
 This folder contains the code to run a client as intended to interact with server.
 The exploit is impossible with the functioning clinet
 
-Folder Exploit (Python or c++ option)
-    -createUsers (create 100 users with random username password secrets)
-    -stealSecrets (run exploit and steal all the secrets and overwrite with HACKED)
-    -secretHashes (a hash on each line for the secrets)
-    -hashOfHashes (a hash of the secrect hashes file)
+Folder Exploit 
+
+    -log.hpp
+    -log.cpp
+    -exploit.hpp
+    -exploit.cpp
+    
 
 This folder contains code to demo exploit (CURRENTLY NOTHING)
 
