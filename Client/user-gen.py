@@ -5,6 +5,7 @@ import pexpect as pex;
 import pexpect.popen_spawn as pop;
 import signal;
 import pathlib as plib;
+import hashlib;
 
 DEBUG = os.environ.get("DEBUG", "0").lower() in ["1", "y", "yes", "true", "on", "color"];
 
@@ -24,6 +25,20 @@ def rm_all_files(dir_path):
                 continue;
     else:
         print("Directory is already empty, no files to remove...");
+
+def sha_256_hash_str(string):
+    # Convert the string to UTF-8 bytes
+    encoded_string = string.encode("utf-8");
+
+    # Create a new SHA256 hash object
+    sha256 = hashlib.sha256();
+
+    # Convert the bytes into the hash.
+    sha256.update(encoded_string);
+
+    # Return the hexadecmial representation of the hash.
+    return sha256.hexdigest();
+
 
 def create_N_notes(N, IP_ADDR, PORT):
     # Create the N users
@@ -52,7 +67,8 @@ def create_N_notes(N, IP_ADDR, PORT):
 
         # NOTE: Make sure to write to the created temp.txt file BEFORE entering "1" input.
         with open("./temp.txt", "w") as fp:
-            fp.write(f"[{i}] ==> USER_{i} SECRET");
+            secret_message = f"[{i}] ==> USER_{i} SECRET";
+            fp.write(sha_256_hash_str(secret_message));
 
         # Upload the file, which can be found at Secrets directory.
         cli_process.sendline("1");
