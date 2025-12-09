@@ -6,6 +6,8 @@ import pexpect.popen_spawn as pop;
 import signal;
 import pathlib as plib;
 import hashlib;
+import random;
+import string;
 
 DEBUG = os.environ.get("DEBUG", "0").lower() in ["1", "y", "yes", "true", "on", "color"];
 
@@ -49,7 +51,7 @@ def create_N_notes(N, IP_ADDR, PORT):
 
         if DEBUG:
             cli_process.logfile = sys.stdout.buffer;
-
+        # Create the user metadata.
         cli_process.expect_exact("Do you already have and account (Y/N) ? : ");
         cli_process.sendline("N");
 
@@ -57,9 +59,9 @@ def create_N_notes(N, IP_ADDR, PORT):
         cli_process.expect_exact("Please enter your username: ");
         cli_process.sendline(f"user_{i}");
 
-        # Send in sample passwords with the same format : password_i
+        # Send length-20 passwords of psuedorandom alphanum passwords: [a-zA-Z0-9]
         cli_process.expect_exact("Please enter your password: ");
-        cli_process.sendline(f"password_{i}");
+        cli_process.sendline("".join(random.choices(string.ascii_letters + string.digits, k=20)));
 
         # NOTE: The temp.txt file is created automatically from the C++ program, 
         # once you enter a username and password.
