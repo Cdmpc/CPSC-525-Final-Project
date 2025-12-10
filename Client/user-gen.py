@@ -82,6 +82,7 @@ def create_hashes():
         for file in files:
             # Robust DIR + FILE path joining.
             file_path = os.path.join(secrets_dir, file);
+
             # Skip non-files
             if not (os.path.isfile(file_path)):
                 continue;
