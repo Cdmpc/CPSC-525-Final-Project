@@ -60,12 +60,24 @@ create_N_notes() succeeded, please check ./Secrets directory.
 
 ============================== [EXPLOIT TERMINATED] ==============================
 ```
+The passwords, will be psuedo-random 20 character strings of range [0-9A-Za-z]
 
 ### 5. The secret files will be located in a created directory called ./Secrets, where your current working directory is the repository's directory.
 
 The secret files will have the name format "userN.txt" and contain the following format:
 ```
-[N] ==> USER_N SECRET (But the file itself will actually contain the SHA256 hash of that message.)
+[N] ==> {30 psuedorandom strings of range [0-9A-Za-z]}
 ```
 
-### NOTE: Limitation, the Client can only run once, subsequent runs of the Client/automation script will cause it to fail. To run it successfuly again, you must manually close and restart the Server, then run the Client again once the Server restarts.
+## NOTE: Limitation, the Client can only run once, subsequent runs of the Client/automation script will cause it to fail. To run it successfuly again, you must manually close and restart the Server, then run the Client again once the Server restarts.
+
+### 6. In the Exploit directory, a file called hash-repo.txt will be created.
+It will have the following format: 
+```
+HASH OF user1.txt ==> [SHA256 HASH OF USER1]
+
+HASH OF user2.txt ==> [SHA256 HASH OF USER2]
+
+HASH OF user3.txt ==> [SHA256 HASH OF USER3]
+```
+These hashes will be used to verify that we have indeed gotten the correct file when we run the exploit, and did not just hardcode it.
