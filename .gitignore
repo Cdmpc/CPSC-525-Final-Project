@@ -250,6 +250,7 @@ __marimo__/
 *.dwo
 
 # Text files from Secrets
-Secrets/user*.txt
-Exploit/user*.txt
+Server/Secrets/user*.txt
+Exploit/Secrets/user*.txt
 Exploit/hash-repo.txt
+Server/hash-repo.txt

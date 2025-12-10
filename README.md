@@ -1,6 +1,6 @@
 # SECRET NOTE APP WITH HEAP-BASED BUFFER OVERFLOW VULNERABILITY - F25 CPSC 525 FINAL PROJECT
 
-# STAGE: (EXPLOIT IS FINISHED, JUST NEED TO MOVE SOME FILES AROUND.)
+# STAGE: (EXPLOIT IS FINISHED)
 
 ### Authored by: Shawn Hanlon & Carlos Morera Pinilla
 
@@ -185,5 +185,36 @@ You will see the ./Secrets/userN.txt files have been replaced with this message:
 ```
 YOU HAVE BEEN HACKED
 ```
-
 ### Again, please ensure the PORT number, is the same as the server's.
+
+## 8. Verifiying it worked.
+You should see in the Exploit directory, a directory called Secrets that now contains all the stolen
+user secret notes.
+
+To verify this we can check the SHA256 hashes.
+
+Run this command:
+```bash
+cd Exploit # If not in Exploit directory yet.
+python3 ./hash-secrets.py # The Exploit dir version of hash-secrets.py
+```
+
+This will create the same hash-repo.txt file you saw in the Server directory, only this time in the Exploit directory.
+
+Open both Server/hash-repo.txt and Exploit/hash-repo.txt files to see they are the same.
+
+To verify even further, verify the SHA256 hashes of hash-repo files themselves.
+
+```bash
+cd .. # To go back to CPSC-525-Final-Project directory
+sha256sum ./Server/hash-repo.txt
+
+6ce32cf30b91bfac30cd39812895c12e2247cc6ca1395601183bb76df29aafd3  .Server/hash-repo.txt
+```
+
+```bash
+sha256sum ./Exploit/hash-repo.txt
+
+6ce32cf30b91bfac30cd39812895c12e2247cc6ca1395601183bb76df29aafd3  ./Exploit/hash-repo.txt
+```
+
