@@ -1,14 +1,24 @@
-# CURRENT STAGE OF EXPLOIT (INCOMPLETE - USER CREATION COMPLETE, NO EXPLOIT YET)
+# OVERVIEW
 
 Authored by: Shawn Hanlon & Carlos Morera Pinilla
 
 Some of this script is adapted from A3 code by Carlos Morera Pinilla and Pavol Federl.
 
-At this stage, the exploit just automates the creation of up to 100 users based on the user's input.
+This Project has been created to demonstrate a heap overflow.
 
-Please run this from the directory created, when you cloned this repository.
+## Parts of the system
 
-## HOW TO RUN THE EXPLOIT:
+1 - Server 
+
+2 - Client
+
+3 - Exploit
+
+## HOW TO RUN THE SERVER:
+
+The server can be run from inside the server folder.
+
+## NEED TO FINISH FROM HERE!!!
 
 ### 1. Clone the repository to your Linux Machine:
 ```bash

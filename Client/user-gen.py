@@ -33,7 +33,7 @@ def create_N_notes(N, IP_ADDR, PORT):
     # Create the N users
     for i in range(1, N + 1):
         # Open up the client as well, on the same port.
-        cli_process = pop.PopenSpawn(f"stdbuf -o0 ./Client/client {IP_ADDR} {PORT}", timeout=5);
+        cli_process = pop.PopenSpawn(f"stdbuf -o0 ./client {IP_ADDR} {PORT}", timeout=5);
         cli_process.delaybeforesend = None;
 
         if DEBUG:
@@ -71,37 +71,6 @@ def create_N_notes(N, IP_ADDR, PORT):
 
     print(f"{N} users created, returning from function...");
 
-# CREATES A SINGLE FILE THAT CONTAINS THE SHA256 HASHES OF EACH SECRET MESSAGE.
-def create_hashes():
-    # Get all the file names from Secrets
-    secrets_dir = "./Secrets";
-    files = os.listdir(secrets_dir);
-
-    # Create HASH repo file
-    with open("./Exploit/hash-repo.txt", "w") as fp_repo:
-        for file in files:
-            # Robust DIR + FILE path joining.
-            file_path = os.path.join(secrets_dir, file);
-
-            # Skip non-files
-            if not (os.path.isfile(file_path)):
-                continue;
-
-            # SHA256 Hasher object and buffer to read secret.
-            sha256_hasher = hashlib.sha256();
-
-            # Open the Secrets files
-            with open(file_path, "rb") as fp_secret:
-                # Read the Secret contents
-                secret = fp_secret.read();
-
-                # Hash the secret, and write it to the REPO file.
-                sha256_hasher.update(secret);
-                fp_repo.write(f"HASH OF {file} ==> {sha256_hasher.hexdigest()}\n");
-
-    # Confirm hashes were complete.
-    print(f"HASHING COMPLETE CHECK ./Exploit/hash-repo.txt file");
-
 
 # ============================================= [MAIN DEFINITION] ============================================== #
 def main(IP_ADDRESS, PORT_NO):
@@ -109,10 +78,6 @@ def main(IP_ADDRESS, PORT_NO):
         # Delete the temp file if it exists before running the exploit script.
         # Also delete the secret text files in the Secrets directory.
         plib.Path("./temp.txt").unlink(missing_ok=True);
-
-        # Create the "Secrets" directory, if it does not exist.
-        plib.Path("./Secrets").mkdir(exist_ok=True);
-        valid_input = False;
 
         # User creation loop.
         while (not valid_input):
@@ -122,16 +87,14 @@ def main(IP_ADDRESS, PORT_NO):
                 valid_input = True;
                 # Let's create N users
                 create_N_notes(N=N_users, IP_ADDR=IP_ADDRESS, PORT=PORT_NO);
-                create_hashes();
-                print("create_N_notes() succeeded, please check ./Secrets directory.");
+                print("create_N_notes() succeeded");
             
             # If the user did not put in anything for created users, just use the default of 50.
             elif (N_users == ""):
                 print("No input detected, using default value of 50 users...");
                 valid_input = True;
                 create_N_notes(N=50, IP_ADDR=IP_ADDRESS, PORT=PORT_NO);
-                create_hashes();
-                print("create_N_notes() succeeded, please check ./Secrets directory.");
+                print("create_N_notes() succeeded");
             
             else:
                 print("INVALID INPUT, PLEASE ENTER A NUMBER <= 100\n");
