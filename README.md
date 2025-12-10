@@ -150,7 +150,7 @@ The secret files will have the name format "userN.txt" and contain the following
 [N] ==> {30 psuedorandom strings of range [0-9A-Za-z]}
 ```
 
-## NOTE: Limitation, the Client can only run once, subsequent runs of the Client/automation script will cause it to fail. To run it successfuly again, you must manually close and restart the Server, then run the Client again once the Server restarts.
+## NOTE: Limitation, the user-gen.py script can only run once, subsequent runs of the Client/automation script will cause it to fail. To run it successfuly again, you must manually close and restart the Server, then run the Client again once the Server restarts.
 
 ### c. In the Server directory, run the hash-secrets.py file.
 ```bash
