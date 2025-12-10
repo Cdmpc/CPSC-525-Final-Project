@@ -32,8 +32,7 @@ def rm_all_files(dir_path):
 def create_N_notes(N, IP_ADDR, PORT):
     # Create the N users
     for i in range(1, N + 1):
-        # Open up the client as well, on the same port.
-        cli_process = pop.PopenSpawn(f"stdbuf -o0 ./client {IP_ADDR} {PORT}", timeout=5);
+        cli_process = pop.PopenSpawn(f"stdbuf -o0 ./Client/client {IP_ADDR} {PORT}", timeout=5);
         cli_process.delaybeforesend = None;
 
         if DEBUG:
@@ -76,11 +75,10 @@ def create_N_notes(N, IP_ADDR, PORT):
 def main(IP_ADDRESS, PORT_NO):
     try:
         # Delete the temp file if it exists before running the exploit script.
-        # Also delete the secret text files in the Secrets directory.
         plib.Path("./temp.txt").unlink(missing_ok=True);
-
+        
         # User creation loop.
-        valid_input = False
+        valid_input = False;
         while (not valid_input):
             N_users = input("How many users do you want to create (MAXIMUM 100): ").strip();
             if (N_users.isdigit() and (int(N_users) <= 100 and int(N_users) > 0)):
@@ -105,6 +103,10 @@ def main(IP_ADDRESS, PORT_NO):
 
     except Exception:
         print("create_N_notes() failed");
+        print("MAKE SURE YOU RUN THIS FROM THE REPOSITORIES MAIN DIRECTORY ==> CPSC-525-Final-Project");
+        print(f"Example your working directory ==> [UC user@{IP_ADDRESS} CPSC-525-Final-Project]");
+        print("Double check any paths to files you see");
+
 
 # ============================================= [MAIN CALL AND STARTING POINT] ============================================== #
 if __name__ == "__main__":
