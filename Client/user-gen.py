@@ -80,6 +80,7 @@ def main(IP_ADDRESS, PORT_NO):
         plib.Path("./temp.txt").unlink(missing_ok=True);
 
         # User creation loop.
+        valid_input = False
         while (not valid_input):
             N_users = input("How many users do you want to create (MAXIMUM 100): ").strip();
             if (N_users.isdigit() and (int(N_users) <= 100 and int(N_users) > 0)):
