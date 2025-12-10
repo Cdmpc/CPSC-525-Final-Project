@@ -7,7 +7,6 @@ Client::Client(std::string hostname, uint16_t port)
     // hostname must be ip till updated to resolve host 
     m_hostname = hostname;
     m_port = port;
-    cli_log("object created");
 }
 
 Client::~Client(){
@@ -15,7 +14,7 @@ Client::~Client(){
 }
 
 void Client::run(){
-    std::cout << "Welcome to SUPER DUPER SECURE NOTES ... " << std::endl;
+    std::cout << "\nWelcome to SUPER DUPER SECURE NOTES ... " << std::endl;
     std::cout << "Store your deepest darkest secrets with us!" << std::endl;
     std::cout << std::endl;
     returning_user();
@@ -29,7 +28,6 @@ void Client::returning_user()
     std::cout << "Do you already have and account (Y/N) ? : ";
     while (invalid){
         std::getline(std::cin, temp);
-        cli_log(temp);
         if(temp.find('Y') == std::string::npos  && temp.find('y') == std::string::npos 
         && temp.find('N') == std::string::npos && temp.find('n') == std::string::npos){
             temp.clear();
@@ -63,7 +61,6 @@ void Client::get_username()
     while (invalid){
         std::cout << "\nPlease enter your username: ";
         std::getline(std::cin, temp);
-        cli_log(temp);
         if(temp.length() < 1 || temp.length() > 31){
             temp.clear();
             std::cout << "username length must be in range [1,31]" << std::endl;
@@ -84,7 +81,6 @@ void Client::get_new_username()
     while (invalid){
         std::cout << "\nPlease enter your new username: ";
         std::getline(std::cin, temp);
-        cli_log(temp);
         if(temp.length() < 1 || temp.length() > 31){
             temp.clear();
             std::cout << "username length must be in range [1,31]" << std::endl;
@@ -105,7 +101,6 @@ void Client::get_password()
     while (invalid){
         std::cout << "\nPlease enter your password: ";
         std::getline(std::cin, temp);
-        cli_log(temp);
         if(temp.length() < 8 || temp.length() > 31){
             temp.clear();
             std::cout << "password length must be in range [8,31]" << std::endl;
@@ -124,9 +119,8 @@ void Client::get_new_password()
     bool invalid = true;
     std::string temp;
     while (invalid){
-        std::cout << "\nPlease enter your password: ";
+        std::cout << "\nPlease enter your new password: ";
         std::getline(std::cin, temp);
-        cli_log(temp);
         if(temp.length() < 8 || temp.length() > 31){
             temp.clear();
             std::cout << "password length must be in range [8,31]" << std::endl;
@@ -158,12 +152,18 @@ void Client::get_note(){
         if(m_response == m_invalid){
             std::cout << "INVALID username or password" << std::endl;
             returning_user();
+            return;
         }
         else{
             invalid = false;
         }
     }
     //go to temp.txt in your current directory
+    std::cout << "\nWELCOME BACK YOUR SECRET HAS BEEN LOADED" << std::endl;
+    std::cout << std::endl;
+    std::cout << "To edit go to your temp.txt file, remember to save when done." << std::endl;
+    std::cout << std::endl;
+    
     create_file_to_edit();
     handle_commands();
 }
@@ -195,6 +195,10 @@ void Client::create_user()
             continue;
         }
     }
+    std::cout << "\nWELCOME YOUR ACCOUNT HAS BEEN CREATED" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Your secret can be writen in your temp.txt file, remember to save when done." << std::endl;
+    std::cout << std::endl;
     //go to temp.txt in your current directory
     create_file_to_edit();
     handle_commands();
@@ -202,10 +206,7 @@ void Client::create_user()
 
 void Client::handle_commands()
 {
-    cli_log("handling commands");
-    std::cout << "Your secret can be writen in your temp.txt file, remember to save when done" << std::endl;
-    std::cout << std::endl;
-
+    
     while(m_editing){
         std::cout << "UPLOAD TO SERVER AND EXIT (1)" << std::endl;
         std::cout << "UPDATE USERNAME           (2)" << std::endl;
@@ -216,7 +217,6 @@ void Client::handle_commands()
         char command;
         while (invalid){
             std::getline(std::cin, temp);
-            cli_log(temp);
             if(temp.find('1') == std::string::npos && temp.find('2') == std::string::npos
             && temp.find('3') == std::string::npos){
                 temp.clear();
@@ -296,14 +296,11 @@ void Client::execute_command()
     // if ececuting command, last command handled
     m_response.clear();
     // connect and execute
-    cli_log(m_command);
     memcpy(m_send, m_command.c_str(), m_command.length());
     connect_to_server();
     m_bytesSent = send(m_clientSocket, m_send, m_command.length(), 0);
-    cli_log("bytes sent", m_bytesSent);
     m_bytesRecv = recv(m_clientSocket, m_recv, sizeof(m_recv), 0);
     m_response = m_recv;
-    cli_log("response", m_response);
 
     //cleanup
     memset(m_send, 0, sizeof(m_send));
@@ -312,6 +309,7 @@ void Client::execute_command()
 
 void Client::store_note()
 {
+
     m_command.clear();
     m_command.reserve(4096);
     m_command.append("LOGOFF ");
@@ -321,11 +319,9 @@ void Client::store_note()
     m_command.append(" *");
     file_to_payload();
     m_command.append(m_payload);
-    cli_log("command in store note", m_command);
     execute_command();
+    std::cout << "\nYOUR SECRET IS NOW SECURE WITH US, THANK YOU AND GOOD BYE" << std::endl;
 
-    // to do handle response
-    cli_log("STORING NOTE...now exiting");
 }
 
 void Client::update_username()
@@ -342,8 +338,6 @@ void Client::update_username()
     execute_command();
     m_username = m_new_username;
 
-    // to do handle response
-    cli_log("UPDATE USERNAME...now returning");
 }
 
 void Client::update_password()
@@ -360,8 +354,6 @@ void Client::update_password()
     execute_command();
     m_password = m_new_password;
 
-    // to do handle response
-    cli_log("UPDATE password...now returning");
 }
 
 void Client::create_file_to_edit()

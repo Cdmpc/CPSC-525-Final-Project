@@ -41,7 +41,6 @@ class Server
     int m_numUsers = 1;
     uint16_t m_Port;
     int m_user_index;
-    bool m_connection = false;
     char m_recv[4096];
     char m_send[4096];
     char m_password[32];
@@ -53,6 +52,7 @@ class Server
     ssize_t m_payloadSize = 0;
     std::vector<User> m_users; 
     User m_user;
+    bool m_running = true;
 
 public:
     

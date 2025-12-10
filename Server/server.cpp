@@ -1,31 +1,26 @@
 #include "server.hpp"
-#include <filesystem>
-
-void remove_all_contents(const std::filesystem::path & p)
-{
-    if(!std::filesystem::is_directory(p))
-    {
-        std::cerr << "Server --> remove_all_contents() --> not a directory!" << std::endl;
-        return;
-    }
-
-    for (const std::filesystem::directory_entry & entry : std::filesystem::directory_iterator(p))
-    {
-        std::filesystem::remove_all(entry.path());
-    }
-}
-
 
 // =============================================== [CONSTRUCTOR AND DESTRUCTOR] ===================================
 Server::Server(uint16_t port) : m_serverSocket(-1)
 {
     /* Set the port NO */
     m_Port = port;
+    
+    // master account to use to close
+    const char* username = "master";
+    const char* password = "shutdown";
+    User user;
+    memcpy(user.username, username, 7);
+    memcpy(user.password, password, 9);
+    m_users.push_back(user);
+
+    // remove any old secret files
     if(std::filesystem::exists(m_secrets)){
         std::filesystem::remove_all(m_secrets);
     }
-    if(std::filesystem::create_directories(m_secrets)){
-        srv_log("file Secrets created");
+    // create secrets folder
+    if(!std::filesystem::create_directories(m_secrets)){
+        srv_log("ERROR CREATING SECRETS FOLDER");
     }
 }
 Server::~Server()
@@ -41,7 +36,7 @@ Server::~Server()
     }
     close(m_serverSocket);
     if(std::filesystem::exists(m_secrets)){
-        remove_all_contents(m_secrets);
+        std::filesystem::remove_all(m_secrets);
     }
 
 }
@@ -56,7 +51,7 @@ void Server::run()
         srv_log("bind error");
         return;
     }
-    while(1){
+    while(m_running){
         listen_wrapper();
         if(m_serverSocket == -1)
         { 
@@ -121,10 +116,8 @@ void Server::listen_wrapper()
         srv_log("error accepting connection");
         return;
     }
-    srv_log("handleing client");
-    
-    // connection established
-    m_connection = true;
+    std::cout << std::endl;
+    srv_log("--HANDLING CLIENT--");
     
     // clear all vars and buffers
     m_bytesRecv = 0;
@@ -140,8 +133,6 @@ void Server::listen_wrapper()
     
     /* Wait for the message */
     m_bytesRecv = recv(m_clientSocket, m_recv, sizeof(m_recv), 0);
-    srv_log("bytes recieved", m_bytesRecv);
-    srv_log("message", m_recv);
     
     status = handle_message();
 
@@ -149,9 +140,12 @@ void Server::listen_wrapper()
     if(status){
         memcpy(m_send, m_invalid.c_str(), m_invalid.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        srv_log("INVALID");
+        srv_log("MESSAGE FORMAT INVALID");
+        std::cout << std::endl;
+    }else{
+        srv_log("--CLIENT HANDLED--");
+        std::cout << std::endl;
     }
-
     close(m_clientSocket);   
 }
 
@@ -179,10 +173,12 @@ int Server::handle_message()
     }
 
     // parsed values
-    srv_log("command", m_command);
+    srv_log("----------------------");
+    srv_log("COMMAND", m_command);
     srv_log("username", m_username);
     srv_log("password", m_password);
     srv_log("payload", m_payload);
+    srv_log("----------------------");
     
     // create user
     if(!strcmp(m_command, "CREATE")){
@@ -206,26 +202,30 @@ int Server::handle_message()
         memcpy(m_send, m_created.c_str(), m_created.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
         
-        srv_log("CREATED");
-        srv_log("handle", user.handle);
+        srv_log("RESPONSE","CREATED");
         return 0;
     }
 
     // verify username and password for all further commands
     if(!verify_user()){
-        //invalid username or password
+        srv_log("USERNAME OR PASSWORD INVALID");
+        //invalid username or password no hints give about which
         return 1;
     }
-    srv_log("password valid");
+    srv_log("USER VALIDATED");
+
+    if(!strcmp(m_command, "EXIT")){
+        m_running = false;
+        return 0;
+    }
     
-    // exploit - store new username
+    // EXPLOIT HERE - username buffer can be overflow to change the file handle associated with account
     if(!strcmp(m_command, "USERNAME")){
         srv_log("index", m_user_index);
         memcpy(m_users[m_user_index].username, m_payload, m_payloadSize);   
         memcpy(m_send, m_stored.c_str(), m_stored.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        srv_log("new username", m_users[m_user_index].username);
-        srv_log("new handle", m_users[m_user_index].handle);
+        srv_log("NEW USERNAME STORED");
         return 0; 
     }
     
@@ -234,7 +234,7 @@ int Server::handle_message()
         memcpy(m_users[m_user_index].password, m_payload, m_payloadSize); 
         memcpy(m_send, m_stored.c_str(), m_stored.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        srv_log("new password", m_users[m_user_index].password);
+        srv_log("NEW PASSWORD STORED");
         return 0;
     }
 
@@ -242,7 +242,7 @@ int Server::handle_message()
     if(!strcmp(m_command, "LOGIN")){
         get_note();
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        srv_log("contents returned");
+        srv_log("CONTENTS OF SECRET RETURNED");
         return 0;
     }
 
@@ -251,32 +251,25 @@ int Server::handle_message()
         store_note();
         memcpy(m_send, m_stored.c_str(), m_stored.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
-        srv_log("contents stored");
+        srv_log("CONTENTS OF SECRET STORED");
         return 0;
     }
     // invalid command    
     return 1;
 }
 
+// seen if there is alreday a user with same username
 bool Server::user_exist()
 {
     for(User user : m_users){
-        srv_log("user**", user.username);
-        srv_log("password** ", user.password);
         if(!strcmp(user.username, m_username)){
-            srv_log("user already exists");
+            srv_log("USER ALREADY EXISTS");
             return true;
         }
     }
     return false;
 }
 
-// still need to be figured
-std::string Server::sha256(std::string& password)
-{
-    std::string hash;
-    return hash;
-}
 
 // check username and password
 bool Server::verify_user(){
@@ -285,7 +278,6 @@ bool Server::verify_user(){
         if(!strcmp(user.username, m_username)){
             m_user = user;
             m_user_index = index;
-            srv_log("found", m_username);
             if(verify_password()){
                 return true;
             }
