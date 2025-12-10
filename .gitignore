@@ -251,4 +251,5 @@ __marimo__/
 
 # Text files from Secrets
 Secrets/user*.txt
+Exploit/user*.txt
 Exploit/hash-repo.txt

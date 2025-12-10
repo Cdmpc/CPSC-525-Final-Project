@@ -35,7 +35,7 @@ def create_hashes():
                 fp_repo.write(f"HASH OF {file} ==> {sha256_hasher.hexdigest()}\n");
 
     # Confirm hashes were complete.
-    print(f"HASHING COMPLETE CHECK ./Exploit/hash-repo.txt file");
+    print(f"HASHING COMPLETE CHECK ./Server/hash-repo.txt file");
 
 
 if __name__ == "__main__": 

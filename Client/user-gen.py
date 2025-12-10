@@ -11,8 +11,6 @@ import string;
 
 DEBUG = os.environ.get("DEBUG", "0").lower() in ["1", "y", "yes", "true", "on", "color"];
 
-# NOTE: This exploit script is meant to be run from the REPOSITORY DIRECTORY.
-# i.e, the directory that is created when you CLONE this repository.
 # ============================================= [HELPER FUNCTIONS] ============================================== #
 def rm_all_files(dir_path):
     secrets_dir = dir_path;
@@ -32,7 +30,7 @@ def rm_all_files(dir_path):
 def create_N_notes(N, IP_ADDR, PORT):
     # Create the N users
     for i in range(1, N + 1):
-        cli_process = pop.PopenSpawn(f"stdbuf -o0 ./Client/client {IP_ADDR} {PORT}", timeout=5);
+        cli_process = pop.PopenSpawn(f"stdbuf -o0 ./client {IP_ADDR} {PORT}", timeout=5);
         cli_process.delaybeforesend = None;
 
         if DEBUG:
@@ -103,9 +101,6 @@ def main(IP_ADDRESS, PORT_NO):
 
     except Exception:
         print("create_N_notes() failed");
-        print("MAKE SURE YOU RUN THIS FROM THE REPOSITORIES MAIN DIRECTORY ==> CPSC-525-Final-Project");
-        print(f"Example your working directory ==> [UC user@{IP_ADDRESS} CPSC-525-Final-Project]");
-        print("Double check any paths to files you see");
 
 
 # ============================================= [MAIN CALL AND STARTING POINT] ============================================== #
@@ -118,4 +113,5 @@ if __name__ == "__main__":
         print("\nCAUGHT ERROR: main() function failed, did you try: ");
         print("argv[1] == IP ADDRESS (127.0.0.1 for example)");
         print("argv[2] == PORT NUMBER (Ex: 5400)");
-        print("Usage: python3 ./Client/user-gen.py argv[1] argv[2]");
+        print("REMEMBER: cd Client");
+        print("Usage: python3 ./user-gen.py argv[1] argv[2]");

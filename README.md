@@ -18,14 +18,12 @@
 
 # HOW TO RUN THE APPLICATION:
 
-### For consistency, Please run these executables and scripts from the repositories directory. I.e, CPSC-525-Final-Project.
-
 ## 1. Clone the repository to your Linux Machine:
 ```bash
 git clone https://github.com/Cdmpc/CPSC-525-Final-Project.git
 ```
 ```bash
-cd CPSC-525-Final-Project # This is the directory to run everything from.
+cd CPSC-525-Final-Project 
 ```
 
 ## 2. Compile the C-programs for the Client, Server and Exploit
@@ -42,7 +40,8 @@ g++ -std=c++20 -Wall -o ./Exploit/exploit ./Exploit/exploit.cpp
 ## 3: Start the SERVER PROGRAM FIRST (Example PORT 7000)
 NOTE: If you have a directory called Secrets, delete it.
 ```
-./Server/server 7000
+cd Server
+./server 7000
 ```
 
 If you see this (Secrets directory will be created): 
@@ -50,12 +49,13 @@ If you see this (Secrets directory will be created):
 LOG::port : 7000
 LOG::file Secrets created
 ```
-The server is connected and ready to go.
+The server is connected and ready to go. Secrets is a sub-directory in Server directory.
 
 ## (OPTIONAL) 4. Normal Client Interaction (Ex: Port 7000)
-Open another terminal from the same working directory (repo directory), and enter the following command.
+Open another terminal and enter the following commands.
 ```bash
-./Client/client 127.0.0.1 7000
+cd Client
+./client 127.0.0.1 7000
 ```
 
 You will be greeted by this interface:
@@ -120,7 +120,8 @@ This step can be done even if you do not do steps 4 and 5.
 This Python script is meant to automate the creation of 100 users
 to the server.
 ```bash
-python3 ./Client/user-gen.py 127.0.0.1 7000
+cd Client # If you are not in Client directory yet.
+python3 ./user-gen.py 127.0.0.1 7000
 ```
 
 If you do not provide command-line arguements to the Python script, this prompt will appear.
@@ -153,11 +154,12 @@ The secret files will have the name format "userN.txt" and contain the following
 
 ### c. In the Server directory, run the hash-secrets.py file.
 ```bash
-python3 ./Server/hash-secrets.py
+cd Server # If you are not in Server directory yet.
+python3 ./hash-secrets.py
 ```
 This will create a single file called hash-repo.txt in the Exploit directory, so 
 ```
-./Exploit/hash-repo.txt
+./Server/hash-repo.txt
 ```
 
 hash-repo.txt will have the following format. 
@@ -174,7 +176,8 @@ These hashes will be used to verify that we have indeed gotten the correct file 
 ## 7. Running the Exploit.
 Now comes the fun part. After you have done step 6, you can run the C++ exploit script like so:
 ```bash
-./Exploit/exploit 127.0.0.1 7000
+cd Exploit # If not in Exploit directory yet.
+./exploit 127.0.0.1 7000
 ```
 
 You will see the ./Secrets/userN.txt files have been replaced with this message:
