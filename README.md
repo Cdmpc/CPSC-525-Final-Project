@@ -38,7 +38,7 @@ g++ -std=c++20 -Wall -o ./Exploit/exploit ./Exploit/exploit.cpp
 ```
 
 ## 3: Start the SERVER PROGRAM FIRST (Example PORT 7000)
-NOTE: If you have a directory called Secrets, delete it.
+NOTE: Once the server is listening on a port, it can be interacted with using the client, or as a hacker using the exploit, or using any network utility following the protocols outlined in protocols.txt
 ```
 cd Server
 ./server 7000
