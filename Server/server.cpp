@@ -202,7 +202,7 @@ int Server::handle_message()
         memcpy(m_send, m_created.c_str(), m_created.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
         
-        srv_log("RESPONSE","CREATED");
+        srv_log("USER CREATED");
         return 0;
     }
 
