@@ -1,6 +1,4 @@
 # include "client.hpp"
-#include <cstddef>
-#include <string>
 
 Client::Client(std::string hostname, uint16_t port)
 {
