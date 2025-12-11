@@ -106,9 +106,9 @@ def main(IP_ADDRESS, PORT_NO):
 # ============================================= [MAIN CALL AND STARTING POINT] ============================================== #
 if __name__ == "__main__":
     try:
-        print("============================== [EXPLOIT START] ===================================\n");
+        print("============================== [USER GEN START] ===================================\n");
         main(sys.argv[1], sys.argv[2]);
-        print("\n============================== [EXPLOIT TERMINATED] ==============================");
+        print("\n============================== [FINISHED] ==============================");
     except Exception:
         print("\nCAUGHT ERROR: main() function failed, did you try: ");
         print("argv[1] == IP ADDRESS (127.0.0.1 for example)");
