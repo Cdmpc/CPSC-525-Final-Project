@@ -16,6 +16,7 @@
 #include <iostream>
 #include <filesystem>
 #include <cstring>
+#include <cstddef>
 #include <cerrno>
 #include "log.cpp"
 #include <algorithm>
