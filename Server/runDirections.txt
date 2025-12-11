@@ -8,5 +8,12 @@ RUN
 
 ./server port
 
-./server 5400
+./server 7000
+
+Sever will wait to handle clients.
+
+To close server:
+
+nc 127.0.0.1 7000
+EXIT master shutdown *
 

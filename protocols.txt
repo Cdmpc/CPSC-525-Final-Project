@@ -48,9 +48,14 @@ server : INVALID
 
 CREATE protocol
 client : CREATE username password *
-    case 1 - valid message
+    case 1 - valid message, user doesn't exist
     server creates new profile
 server : CREATED
     case 2 - already exisits
 server : TAKEN
     server closes connection
+
+EXIT protocol (done using nc)
+
+    EXIT master shutdown *
+server : shuts down

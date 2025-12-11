@@ -192,7 +192,7 @@ void Client::create_user()
             std::cout << "Username already taken" << std::endl;
             std::cout << std::endl;
             returning_user();
-            continue;
+            return;
         }
     }
     std::cout << "\nWELCOME YOUR ACCOUNT HAS BEEN CREATED" << std::endl;
@@ -320,7 +320,7 @@ void Client::store_note()
     file_to_payload();
     m_command.append(m_payload);
     execute_command();
-    std::cout << "\nYOUR SECRET IS NOW SECURE WITH US, THANK YOU AND GOOD BYE" << std::endl;
+    std::cout << "\nYOUR SECRET IS NOW SECURE WITH US, THANK YOU AND GOOD BYE\n" << std::endl;
 
 }
 
@@ -338,6 +338,8 @@ void Client::update_username()
     execute_command();
     m_username = m_new_username;
 
+    std::cout << "\nYOUR USERNAME HAS BEEN UPDATED\n" << std::endl;
+
 }
 
 void Client::update_password()
@@ -353,6 +355,8 @@ void Client::update_password()
     m_command.append(m_new_password);
     execute_command();
     m_password = m_new_password;
+
+    std::cout << "\nYOUR PASSWORD HAS BEEN UPDATED\n" << std::endl;
 
 }
 

@@ -8,6 +8,8 @@ RUN
 
 ./client hostname port
 
-./client 127.0.0.1 5400
+./client 127.0.0.1 7000
 
-*** hostname needs to be 127.0.0.1 for now may need to fix to resolve csx1, csx2, csx3
+AUTOMATE ADDING UPTO 100 USERS
+
+python3 user-gen.py 127.0.0.1 7000

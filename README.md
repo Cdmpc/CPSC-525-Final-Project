@@ -47,9 +47,8 @@ cd Server
 If you see this (Secrets directory will be created): 
 ```
 LOG::port : 7000
-LOG::file Secrets created
 ```
-The server is connected and ready to go. Secrets is a sub-directory in Server directory.
+The server is waiting for client connections. You can now use the client to interact with it.
 
 ## (OPTIONAL) 4. Normal Client Interaction (Ex: Port 7000)
 Open another terminal and enter the following commands.
@@ -60,7 +59,6 @@ cd Client
 
 You will be greeted by this interface:
 ```
-LOG::object created
 Welcome to SUPER DUPER SECURE NOTES ...
 Store your deepest darkest secrets with us!
 
@@ -91,7 +89,8 @@ UPDATE PASSWORD           (3)
 ```
 Write something to the temp.txt file, save that file (Ctrl + S), and then Enter "1" on the client terminal.
 
-In the Secrets created directory, a file called user1.txt will appear with your secret you typed inside, temp.txt will be deleted, and the client will close.
+temp.txt will be deleted, and the client will close. The server will have a file stored in its Secrets folder with your secret.
+
 
 ## 5. (OPTIONAL) Updating username or password.
 From here: 
@@ -107,11 +106,13 @@ If you enter 2, you will be prompted to enter your new username. Type a new user
 
 ```
 Please enter your new username: carlos2
-LOG::carlos2
-LOG::USERNAME carlos password *carlos2
-LOG::bytes sent : 33
-LOG::response : STORED
-LOG::UPDATE USERNAME...now returning
+
+YOUR USERNAME HAS BEEN UPDATED
+
+UPLOAD TO SERVER AND EXIT (1)
+UPDATE USERNAME           (2)
+UPDATE PASSWORD           (3)
+(1, 2, 3) ? :
 ```
 The same steps apply for option (3)
 
@@ -150,14 +151,14 @@ The secret files will have the name format "userN.txt" and contain the following
 [N] ==> {30 psuedorandom strings of range [0-9A-Za-z]}
 ```
 
-## NOTE: Limitation, the user-gen.py script can only run once, subsequent runs of the Client/automation script will cause it to fail. To run it successfuly again, you must manually close and restart the Server, then run the Client again once the Server restarts.
+## NOTE: Limitation, the user-gen.py script can only run once, subsequent runs use the same usernames which already exist on server.
 
-### c. In the Server directory, run the hash-secrets.py file.
+### c. In the Server directory, run the hash-secrets.py file. It will create a hash of all the server secrets that can be used to verify that the hacker got the secrets.
 ```bash
 cd Server # If you are not in Server directory yet.
 python3 ./hash-secrets.py
 ```
-This will create a single file called hash-repo.txt in the Exploit directory, so 
+This will create a single file called hash-repo.txt in the Server directory, so 
 ```
 ./Server/hash-repo.txt
 ```
@@ -180,7 +181,7 @@ cd Exploit # If not in Exploit directory yet.
 ./exploit 127.0.0.1 7000
 ```
 
-You will see the ./Secrets/userN.txt files have been replaced with this message:
+On the server you will see the secret files have been replaced with this message:
 
 ```
 YOU HAVE BEEN HACKED
@@ -218,3 +219,4 @@ sha256sum ./Exploit/hash-repo.txt
 6ce32cf30b91bfac30cd39812895c12e2247cc6ca1395601183bb76df29aafd3  ./Exploit/hash-repo.txt
 ```
 
+## To see the protocol used betwenn client/server see protocols.txt
