@@ -144,7 +144,7 @@ create_N_notes() succeeded, please check ./Secrets directory.
 ```
 The passwords, will be psuedo-random 20 character strings of range [0-9A-Za-z]
 
-### b. The secret files will be located in a created directory called ./Secrets, where your current working directory is the repository's directory.
+### b. The users and their secrets will be stored on the server.
 
 The secret files will have the name format "userN.txt" and contain the following format:
 ```
@@ -219,4 +219,4 @@ sha256sum ./Exploit/hash-repo.txt
 6ce32cf30b91bfac30cd39812895c12e2247cc6ca1395601183bb76df29aafd3  ./Exploit/hash-repo.txt
 ```
 
-## To see the protocol used betwenn client/server see protocols.txt
+## To see the protocol used between client/server see protocols.txt
