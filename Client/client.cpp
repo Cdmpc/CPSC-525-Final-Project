@@ -1,9 +1,8 @@
 # include "client.hpp"
 
-Client::Client(std::string hostname, uint16_t port)
+Client::Client(std::string ipaddr, uint16_t port)
 {
-    // hostname must be ip till updated to resolve host 
-    m_hostname = hostname;
+    m_ipaddr = ipaddr;
     m_port = port;
 }
 
@@ -18,9 +17,10 @@ void Client::run(){
     returning_user();
 }
 
+// determines if it is new user or returning user
 void Client::returning_user()
 {
-    //loop continues until user enters valid username
+
     bool invalid = true;
     std::string temp;
     std::cout << "Do you already have and account (Y/N) ? : ";
@@ -186,6 +186,7 @@ void Client::create_user()
             m_response.clear();
             taken = false;
         }
+        // taken
         if(m_response == m_taken){
             std::cout << "Username already taken" << std::endl;
             std::cout << std::endl;
@@ -204,12 +205,15 @@ void Client::create_user()
 
 void Client::handle_commands()
 {
-    
     while(m_editing){
+        
+        // display options
         std::cout << "UPLOAD TO SERVER AND EXIT (1)" << std::endl;
         std::cout << "UPDATE USERNAME           (2)" << std::endl;
         std::cout << "UPDATE PASSWORD           (3)" << std::endl;
         std::cout << "(1, 2, 3) ? : ";
+        
+        // determine if input valid
         bool invalid = true;
         std::string temp;
         char command;
@@ -234,6 +238,7 @@ void Client::handle_commands()
                 invalid = false;
             }
         }
+        // deal with command
         switch (command){
             case '1' : 
                 store_note();
@@ -254,7 +259,6 @@ void Client::handle_commands()
 
 void Client::connect_to_server()
 {
-    // resolve hostname //m_connected should be local????
     while(!m_connected){
         /* Create the socket file descriptor. */
         m_clientSocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -271,7 +275,7 @@ void Client::connect_to_server()
         server_address.sin_family = AF_INET;
         server_address.sin_port = htons(m_port);
         // Insert server_ip as bytes into client_address.sin_addr buffer. 
-        inet_pton(AF_INET, m_hostname.c_str(), &server_address.sin_addr);
+        inet_pton(AF_INET, m_ipaddr.c_str(), &server_address.sin_addr);
 
         /* Connect to the server on the socket. */
         int conn_res = connect(m_clientSocket, (const struct sockaddr*)&server_address, (socklen_t)sizeof(sockaddr_in));
@@ -307,7 +311,7 @@ void Client::execute_command()
 
 void Client::store_note()
 {
-
+    // create command and send to server
     m_command.clear();
     m_command.reserve(4096);
     m_command.append("LOGOFF ");
@@ -374,7 +378,7 @@ void Client::file_to_payload(){
 int main(int argc, char* argv[]){
 
     if(argc < 3){
-        std::cout << "useage : hostname port" << std::endl;
+        std::cout << "useage : ipaddr port" << std::endl;
         return -1;
     }
     if(strlen(argv[2]) != 4){
@@ -383,10 +387,10 @@ int main(int argc, char* argv[]){
     }
     std::string port_str = "PORT";
     int port = atoi(argv[2]);
-    std::string hostname = argv[1];
+    std::string ipaddr = argv[1];
 
     // create server and run, run loops
-    Client client(hostname, (uint16_t)port);
+    Client client(ipaddr, (uint16_t)port);
     client.run();
     return 0;
 }

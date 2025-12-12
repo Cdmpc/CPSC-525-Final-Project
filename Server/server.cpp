@@ -23,6 +23,7 @@ Server::Server(uint16_t port) : m_serverSocket(-1)
         srv_log("ERROR CREATING SECRETS FOLDER");
     }
 }
+
 Server::~Server()
 {
     /* Close off the server socket. */
@@ -151,6 +152,7 @@ void Server::listen_wrapper()
 
 int Server::handle_message()
 {
+    // verify correct format
     try{
         // parse message
         std::stringstream ss(m_recv);
@@ -165,7 +167,7 @@ int Server::handle_message()
         }
         memcpy(m_payload, start + 1, MAX_PAYLOAD);
         // store payload size
-        m_payloadSize = m_bytesRecv - 10 - strlen(m_username) - strlen(m_password);
+        m_payloadSize = m_bytesRecv - size_t(start + 1 - m_recv);
     }
     catch(...){
         //message was invalid
@@ -182,6 +184,7 @@ int Server::handle_message()
     
     // create user
     if(!strcmp(m_command, "CREATE")){
+        // check if they exist
         if(user_exist()){
             memcpy(m_send, m_taken.c_str(), m_taken.length());
             m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
@@ -189,16 +192,21 @@ int Server::handle_message()
         }
         // user doesn't exist safe to add
         User user;
+
+        // fill username and password
         memcpy(user.username, m_username, sizeof(m_username));
         memcpy(user.password, m_password, sizeof(m_password));
         
+        // fill file handle
         std::string id = std::to_string(m_numUsers++);
         memcpy(user.handle, m_handlePre, 4);
         memcpy(&user.handle[4], id.c_str(), id.length());
         memcpy(&user.handle[4 + id.length()], m_handlePost, 4);
 
+        // store to vector on heap
         m_users.push_back(user);
     
+        // prep send buffer with created response
         memcpy(m_send, m_created.c_str(), m_created.length());
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
         
@@ -209,21 +217,27 @@ int Server::handle_message()
     // verify username and password for all further commands
     if(!verify_user()){
         srv_log("USERNAME OR PASSWORD INVALID");
-        //invalid username or password no hints give about which
+        //invalid username or password no hints given about which
         return 1;
     }
     srv_log("USER VALIDATED");
 
+    // command to shut down server gracefully
     if(!strcmp(m_command, "EXIT")){
         m_running = false;
         return 0;
     }
     
     // EXPLOIT HERE - username buffer can be overflow to change the file handle associated with account
+
+    // store new username
     if(!strcmp(m_command, "USERNAME")){
-        srv_log("index", m_user_index);
-        memcpy(m_users[m_user_index].username, m_payload, m_payloadSize);   
+        memcpy(m_users[m_user_index].username, m_payload, m_payloadSize); 
+        
+        // prep send buffer with stored response
         memcpy(m_send, m_stored.c_str(), m_stored.length());
+
+        // send response
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
         srv_log("NEW USERNAME STORED");
         return 0; 
@@ -232,7 +246,11 @@ int Server::handle_message()
     // store new password
     if(!strcmp(m_command, "PASSWORD")){
         memcpy(m_users[m_user_index].password, m_payload, m_payloadSize); 
+
+        // prep send buffer with stored response
         memcpy(m_send, m_stored.c_str(), m_stored.length());
+
+        // send response
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
         srv_log("NEW PASSWORD STORED");
         return 0;
@@ -240,7 +258,10 @@ int Server::handle_message()
 
     // send file contents back
     if(!strcmp(m_command, "LOGIN")){
+        // load content to send buffer
         get_note();
+
+        // send note contents
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
         srv_log("CONTENTS OF SECRET RETURNED");
         return 0;
@@ -248,8 +269,13 @@ int Server::handle_message()
 
     // save payload to file
     if(!strcmp(m_command, "LOGOFF")){
+        // store payload to their file
         store_note();
+
+        // prep send buffer with stored response
         memcpy(m_send, m_stored.c_str(), m_stored.length());
+
+        // send response
         m_bytesSent = send(m_clientSocket, m_send, sizeof(m_send), 0);
         srv_log("CONTENTS OF SECRET STORED");
         return 0;
@@ -275,9 +301,11 @@ bool Server::user_exist()
 bool Server::verify_user(){
     int index = 0;
     for(User user : m_users){
+        // find user
         if(!strcmp(user.username, m_username)){
             m_user = user;
             m_user_index = index;
+            // verify password
             if(verify_password()){
                 return true;
             }
@@ -305,7 +333,7 @@ void Server::get_note(){
     fp.read(m_send, MAX_PAYLOAD);
 }
 
-
+// driver code
 int main(int argc, char* argv[]){
 
     if(argc < 2){
@@ -321,7 +349,7 @@ int main(int argc, char* argv[]){
 
     srv_log(port_str, port);
 
-    // create server and run, run loops
+    // create server and run
     Server server(port);
     server.run();
 

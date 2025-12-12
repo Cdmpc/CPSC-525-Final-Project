@@ -1,3 +1,10 @@
+/* 
+
+This Client is intended to work exclusively with its Server.
+The Client/Server protocols can be found in protocols.txt
+
+*/
+
 #pragma once
 
 #include <cstdint>
@@ -27,7 +34,6 @@ class Client
     std::string m_new_username;
     std::string m_password;
     std::string m_new_password;
-
     const size_t MAX_PAYLOAD = 4096 - (32 * 3);
     std::string m_command = "";
     std::string m_response = "";
@@ -39,7 +45,7 @@ class Client
     std::string m_path = "./Secret/";
     int m_clientSocket;
     uint16_t m_port;
-    std::string m_hostname;
+    std::string m_ipaddr;
     char m_recv[4096];
     char m_send[4096];
     char m_payload[4096];

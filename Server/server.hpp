@@ -1,3 +1,33 @@
+/* 
+
+This server is intended to work exclusively with its Client.
+The Client/Server protocols can be found in protocols.txt
+
+This server is not persistent. If it crashes all information
+is lost, with then exception of any created secret files. User credetials
+will be lost.
+
+proper shut down that deletes the Secrets as well and can be done by
+using a network utility such as nc
+
+$ nc 127.0.0.1 7000
+EXIT master shutdown *
+
+When a new user is created on the sever their credentials,
+username, password and file handle will be stored in the 
+users vector on the heap.
+
+When they logoff using the client their secrect will be stored
+to their file handle.
+
+When they login using the client they will receive the contents
+of the file.
+
+When they update their username or password this will be reflected
+in their credentails within the users vector.
+
+*/
+
 #pragma once
 
 #include <cstdint>
@@ -70,5 +100,4 @@ private:
     bool verify_user();                
     void store_note();         
     void get_note();                
-    std::string sha256(std::string& password);
 };
